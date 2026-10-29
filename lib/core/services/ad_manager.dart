@@ -58,9 +58,7 @@ class AdManager {
     placementArticleDetail: 60, // Mínimo 60s para detalle
   };
 
-  int _interstitialDailyCount = 0;
   int _actionCounter = 0;
-  bool _forceTestMode = false;
 
   // Notificadores reactivos
   final ValueNotifier<int> nativeAdLoadedNotifier = ValueNotifier<int>(0);
@@ -68,8 +66,6 @@ class AdManager {
   final ValueNotifier<double> bannerHeightNotifier = ValueNotifier<double>(50.0);
   final ValueNotifier<bool> debugMetaEnabledNotifier = ValueNotifier<bool>(true);
   final ValueNotifier<bool> debugYandexEnabledNotifier = ValueNotifier<bool>(true);
-  final ValueNotifier<bool> forceTestModeNotifier = ValueNotifier<bool>(false);
-  final ValueNotifier<int> interstitialCountNotifier = ValueNotifier<int>(0);
   final ValueNotifier<int> actionCounterNotifier = ValueNotifier<int>(0);
   final ValueNotifier<int> cooldownTickNotifier = ValueNotifier<int>(0);
 
@@ -79,9 +75,6 @@ class AdManager {
   bool get showBannerAds => _showAds && _showBannerAds;
   bool get isMetaEnabled => debugMetaEnabledNotifier.value;
   bool get isYandexEnabled => debugYandexEnabledNotifier.value;
-  bool get forceTestMode => forceTestModeNotifier.value;
-  int get dailyInterstitialsCount => _interstitialDailyCount;
-  int get maxDailyInterstitials => 6;
   int get actionsUntilNextInterstitial => 5 - (_actionCounter % 5);
   int get actionCounter => _actionCounter;
   double get houseBannerRatio => _houseBannerRatio;
@@ -103,14 +96,8 @@ class AdManager {
 
       // Cargar configuraciones persistidas desde Hive
       final dateKey = _todayDateKey();
-      _interstitialDailyCount = HiveManager.getSync<int>('ads_interstitial_daily_count_$dateKey') ?? 0;
-      interstitialCountNotifier.value = _interstitialDailyCount;
-
       _actionCounter = HiveManager.getSync<int>('ads_action_counter_$dateKey') ?? 0;
       actionCounterNotifier.value = _actionCounter;
-
-      _forceTestMode = HiveManager.getSync<bool>('force_test_mode') ?? false;
-      forceTestModeNotifier.value = _forceTestMode;
 
       final savedMeta = HiveManager.getSync<bool>('debug_meta_ads_enabled');
       if (savedMeta != null) debugMetaEnabledNotifier.value = savedMeta;
@@ -129,10 +116,6 @@ class AdManager {
       // 1. Inicializar SDKs nativos de anuncios en Kotlin
       final ok = await _channel.invokeMethod<bool>('initAds') ?? false;
       debugPrint('[AdManager] Inicialización nativa completada (ok=$ok).');
-
-      if (_forceTestMode) {
-        await _channel.invokeMethod('setForcedTestMode', {'enabled': true});
-      }
 
       // Sincronizar flags de red con nativo
       if (savedMeta != null) {
@@ -312,12 +295,6 @@ class AdManager {
     final dateKey = _todayDateKey();
     HiveManager.setSync<int>('ads_last_shown_${placement}_$dateKey', now.millisecondsSinceEpoch);
 
-    if (placement == placementInterstitial) {
-      _interstitialDailyCount++;
-      interstitialCountNotifier.value = _interstitialDailyCount;
-      HiveManager.setSync<int>('ads_interstitial_daily_count_$dateKey', _interstitialDailyCount);
-    }
-
     cooldownTickNotifier.value++;
     debugPrint('[AdManager] ⏱️ Cooldown iniciado para [$placement] tras impresión real.');
   }
@@ -335,18 +312,15 @@ class AdManager {
     return DateTime.now().difference(last).inSeconds < 45;
   }
 
-  /// Reinicia todos los cooldowns, límites diarios y contadores de acción a cero.
+  /// Reinicia todos los cooldowns y contadores de acción a cero.
   void resetCooldownsAndCounters() {
     _lastAdShownTime.clear();
     _lastMetaNoFillTime.clear();
-    _interstitialDailyCount = 0;
     _actionCounter = 0;
-    interstitialCountNotifier.value = 0;
     actionCounterNotifier.value = 0;
     cooldownTickNotifier.value++;
 
     final dateKey = _todayDateKey();
-    HiveManager.setSync<int>('ads_interstitial_daily_count_$dateKey', 0);
     HiveManager.setSync<int>('ads_action_counter_$dateKey', 0);
 
     for (final p in [placementInterstitial, placementFeedCompact, placementArticleDetail]) {
@@ -366,16 +340,14 @@ class AdManager {
     }
   }
 
-  /// Fuerza el modo de prueba (Test Mode) en Meta y Yandex independientemente de Release/Debug.
-  Future<void> setForcedTestMode(bool enabled) async {
-    _forceTestMode = enabled;
-    forceTestModeNotifier.value = enabled;
-    HiveManager.setSync<bool>('force_test_mode', enabled);
+  /// Abre el Test Activity (Debug Panel / Integration Inspector) oficial de Yandex Mobile Ads.
+  Future<bool> showYandexTestActivity() async {
     try {
-      await _channel.invokeMethod('setForcedTestMode', {'enabled': enabled});
-      debugPrint('[AdManager] Modo prueba forzado actualizado: $enabled');
+      final ok = await _channel.invokeMethod<bool>('showYandexTestActivity') ?? false;
+      return ok;
     } catch (e) {
-      debugPrint('[AdManager] Error configurando setForcedTestMode: $e');
+      debugPrint('[AdManager] Error abriendo Yandex Test Activity: $e');
+      return false;
     }
   }
 }

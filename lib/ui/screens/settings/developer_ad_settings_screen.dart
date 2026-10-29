@@ -6,8 +6,8 @@ import '../../components/app_header_top_bar.dart';
 import '../../components/glass_card.dart';
 
 /// Panel de control y monitoreo de monetización publicitaria para desarrolladores.
-/// Permite conmutar redes, forzar Test Mode, inspeccionar cooldowns en tiempo real
-/// y verificar identificadores de prueba (AAID y FBAdPrefs).
+/// Permite conmutar redes publicitarias, inspeccionar cooldowns en tiempo real,
+/// abrir el Test Activity de Yandex y verificar identificadores de prueba (AAID y FBAdPrefs).
 class DeveloperAdSettingsScreen extends StatefulWidget {
   const DeveloperAdSettingsScreen({super.key});
 
@@ -64,7 +64,7 @@ class _DeveloperAdSettingsScreenState extends State<DeveloperAdSettingsScreen> {
       body: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         children: [
-          // 1. Interruptores de redes y test mode
+          // 1. Interruptores de redes
           _buildNetworkTogglesCard(primary),
           const SizedBox(height: 12),
 
@@ -72,19 +72,15 @@ class _DeveloperAdSettingsScreenState extends State<DeveloperAdSettingsScreen> {
           _buildSdkStatusCard(),
           const SizedBox(height: 12),
 
-          // 3. Frecuencia y cuotas diarias
-          _buildFrequencyCappingCard(primary),
-          const SizedBox(height: 12),
-
-          // 4. Temporizadores de enfriamiento (Cooldowns independientes)
+          // 3. Temporizadores de enfriamiento (Cooldowns independientes)
           _buildCooldownsCard(primary),
           const SizedBox(height: 12),
 
-          // 5. Identificadores de dispositivo de pruebas
+          // 4. Identificadores de dispositivo de pruebas
           _buildDeviceIdentifiersCard(primary),
           const SizedBox(height: 16),
 
-          // 6. Botones de acción manual
+          // 5. Botones de acción manual y Test Activity de Yandex
           _buildActionButtons(primary),
           const SizedBox(height: 24),
         ],
@@ -105,7 +101,7 @@ class _DeveloperAdSettingsScreenState extends State<DeveloperAdSettingsScreen> {
               Icon(Icons.toggle_on_outlined, color: primary, size: 22),
               const SizedBox(width: 8),
               const Text(
-                'Redes Publicitarias y Modo Prueba',
+                'Redes Publicitarias',
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
               ),
             ],
@@ -137,23 +133,6 @@ class _DeveloperAdSettingsScreenState extends State<DeveloperAdSettingsScreen> {
               value: enabled,
               onChanged: (val) async {
                 await adManager.toggleNetwork('yandex', val);
-                if (!mounted) return;
-                setState(() {});
-              },
-            ),
-          ),
-          const Divider(height: 12),
-          ValueListenableBuilder<bool>(
-            valueListenable: adManager.forceTestModeNotifier,
-            builder: (context, forceTest, _) => SwitchListTile(
-              dense: true,
-              contentPadding: EdgeInsets.zero,
-              activeThumbColor: Colors.amber[700],
-              title: const Text('Forzar Modo Prueba (Test Mode)', style: TextStyle(fontWeight: FontWeight.w600)),
-              subtitle: const Text('Activa anuncios de prueba sin importar Release/Debug', style: TextStyle(fontSize: 11)),
-              value: forceTest,
-              onChanged: (val) async {
-                await adManager.setForcedTestMode(val);
                 if (!mounted) return;
                 setState(() {});
               },
@@ -214,73 +193,6 @@ class _DeveloperAdSettingsScreenState extends State<DeveloperAdSettingsScreen> {
         ),
       ],
     );
-  }
-
-  Widget _buildFrequencyCappingCard(Color primary) {
-    final adManager = AdManager.instance;
-    final currentDaily = adManager.dailyInterstitialsCount;
-    final maxDaily = adManager.maxDailyInterstitials;
-    final actionsLeft = adManager.actionsUntilNextInterstitial;
-
-    return GlassCard(
-      padding: const EdgeInsets.all(14),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(Icons.speed_rounded, color: primary, size: 20),
-              const SizedBox(width: 8),
-              const Text(
-                'Límites y Frecuencia de Anuncios',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text('Interstitials vistos hoy:', style: TextStyle(fontSize: 13)),
-              Text(
-                '$currentDaily / $maxDaily',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 14,
-                  color: currentDaily >= maxDaily ? Colors.red : primary,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 4),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(4),
-            child: LinearProgressIndicator(
-              value: (currentDaily / maxDaily).clamp(0.0, 1.0),
-              backgroundColor: themeProgressBg(context),
-              valueColor: AlwaysStoppedAnimation<Color>(
-                currentDaily >= maxDaily ? Colors.red : primary,
-              ),
-            ),
-          ),
-          const SizedBox(height: 10),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text('Acciones para próximo anuncio:', style: TextStyle(fontSize: 13)),
-              Text(
-                '$actionsLeft restantes (cada 5)',
-                style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Color themeProgressBg(BuildContext context) {
-    return Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5);
   }
 
   Widget _buildCooldownsCard(Color primary) {
@@ -399,6 +311,34 @@ class _DeveloperAdSettingsScreenState extends State<DeveloperAdSettingsScreen> {
   Widget _buildActionButtons(Color primary) {
     return Column(
       children: [
+        // Botón principal: Test Activity de Yandex (Integration Inspector / Debug Panel)
+        SizedBox(
+          width: double.infinity,
+          child: FilledButton.icon(
+            style: FilledButton.styleFrom(
+              backgroundColor: const Color(0xFFFC3F1D), // Rojo corporativo Yandex
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            ),
+            icon: const Icon(Icons.bug_report_rounded, size: 20),
+            label: const Text(
+              'Test Activity de Yandex',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+            ),
+            onPressed: () async {
+              final ok = await AdManager.instance.showYandexTestActivity();
+              if (!mounted) return;
+              if (!ok) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('No se pudo abrir el Test Activity de Yandex.')),
+                );
+              }
+            },
+          ),
+        ),
+        const SizedBox(height: 10),
+
         Row(
           children: [
             Expanded(

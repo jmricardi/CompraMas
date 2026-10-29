@@ -13,18 +13,13 @@ extension AdManagerInterstitial on AdManager {
     }
   }
 
-  /// Verifica si se cumplen todas las reglas estrictas para mostrar un intersticial:
-  /// 1. Anuncios globales activados (`_showAds` o `forceTestMode`)
-  /// 2. Límite diario no superado (< 6 al día)
-  /// 3. Cooldown de 120 segundos completado desde la última visualización real
+  /// Verifica si se cumplen las reglas estrictas para mostrar un intersticial:
+  /// 1. Anuncios globales activados (`_showAds`)
+  /// 2. Cooldown de 120 segundos completado desde la última visualización real
   bool canShowInterstitial() {
-    if (!_showAds && !forceTestMode) return false;
-    if (dailyInterstitialsCount >= maxDailyInterstitials && !forceTestMode) {
-      debugPrint('[AdManager] ⛔ Límite diario de intersticiales alcanzado ($dailyInterstitialsCount/$maxDailyInterstitials)');
-      return false;
-    }
+    if (!_showAds) return false;
     final remaining = getRemainingCooldown(AdManager.placementInterstitial);
-    if (remaining > 0 && !forceTestMode) {
+    if (remaining > 0) {
       debugPrint('[AdManager] ⏳ Cooldown activo para intersticial ($remaining s restantes)');
       return false;
     }

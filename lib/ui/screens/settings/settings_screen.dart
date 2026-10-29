@@ -19,7 +19,6 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  final int _adsWatched = 3;
   int _devTapCount = 0;
   bool _isDevUnlocked = false;
 
@@ -50,15 +49,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ),
       );
     }
-  }
-
-  Future<void> _handleWatchAd() async {
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('¡Gracias por tu apoyo! CompraMas es 100% gratuita y sin anuncios intrusivos.'),
-      ),
-    );
   }
 
   Future<void> _launchExternalUrl(String urlString) async {
@@ -133,25 +123,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
           _buildConfiguracionContainer(context),
           const SizedBox(height: 10),
 
-          // 2. Anuncios vistos hoy
-          _ActionCard(
-            icon: Icons.stars_outlined,
-            title: 'Anuncios vistos hoy',
-            subtitle: 'Toca para apoyar la app sin costo',
-            trailing: Text(
-              '$_adsWatched / 5',
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
-            ),
-            onTap: _handleWatchAd,
-          ),
-          const SizedBox(height: 10),
-
           // Panel de anuncios para desarrolladores (si está desbloqueado)
           if (_isDevUnlocked) ...[
             _ActionCard(
               icon: Icons.developer_mode_rounded,
               title: 'Panel de Anuncios (Desarrollador)',
-              subtitle: 'Meta, Yandex, Test Mode y Cooldowns',
+              subtitle: 'Meta, Yandex, Cooldowns y Test Activity',
               trailing: const Icon(Icons.chevron_right_rounded),
               onTap: () {
                 Navigator.of(context).push(
@@ -162,7 +139,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             const SizedBox(height: 10),
           ],
 
-          // 3. Contenedor "Ayuda" (luego de anuncios vistos hoy)
+          // 2. Contenedor "Ayuda"
           _buildAyudaContainer(context),
           const SizedBox(height: 10),
 

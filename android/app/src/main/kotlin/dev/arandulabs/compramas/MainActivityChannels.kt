@@ -99,6 +99,18 @@ internal fun MainActivity.configureCompraMasFlutterEngine(flutterEngine: Flutter
                     result.success(isInterstitialReady())
                 }
 
+                "showYandexTestActivity", "showYandexDebugPanel" -> {
+                    try {
+                        runOnUiThread {
+                            YandexAds.showDebugPanel(this)
+                        }
+                        result.success(true)
+                    } catch (e: Exception) {
+                        Log.e("CompraMasAds", "Error abriendo Yandex Test Activity / Debug Panel: $e")
+                        result.success(false)
+                    }
+                }
+
                 "showBottomBanner" -> {
                     showBottomBanner()
                     result.success(true)

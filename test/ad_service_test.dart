@@ -68,20 +68,6 @@ void main() {
       expect(adManager.isPlacementReady(AdManager.placementInterstitial), isFalse);
     });
 
-    test('Frequency Capping: límite de 6 intersticiales diarios', () {
-      final adManager = AdManager.instance;
-      expect(adManager.dailyInterstitialsCount, 0);
-      expect(adManager.maxDailyInterstitials, 6);
-
-      // Simular 6 impresiones de intersticial
-      for (int i = 0; i < 6; i++) {
-        adManager.recordAdImpression(AdManager.placementInterstitial);
-      }
-
-      expect(adManager.dailyInterstitialsCount, 6);
-      expect(adManager.canShowInterstitial(), isFalse);
-    });
-
     test('Contador de acciones calcula correctamente el próximo anuncio cada 5 acciones', () async {
       final adManager = AdManager.instance;
       expect(adManager.actionCounter, 0);
@@ -122,7 +108,6 @@ void main() {
 
       expect(adManager.getRemainingCooldown(AdManager.placementInterstitial), 0);
       expect(adManager.getRemainingCooldown(AdManager.placementFeedCompact), 0);
-      expect(adManager.dailyInterstitialsCount, 0);
       expect(adManager.actionCounter, 0);
       expect(adManager.isMetaOnNoFillBackoff(AdManager.placementFeedCompact), isFalse);
     });

@@ -1,41 +1,75 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'clay/clay_squircle_card.dart';
 
-/// Diálogo personalizado (Pre-Permission Primer) para solicitar ubicación con estética Claymorphism.
-/// Android exige que el cuadro de diálogo final sea el nativo del sistema operativo (por seguridad de Android).
-/// Sin embargo, la mejor práctica de UX es presentar previamente esta pantalla personalizada
-/// que explica al usuario con amabilidad y transparencia por qué la app necesita la ubicación.
-class LocationPermissionPrimerDialog extends StatelessWidget {
-  const LocationPermissionPrimerDialog({super.key});
+/// Diálogo unificado (Pre-Permission Primer) para solicitar permisos de
+/// Ubicación y Cámara con estética Claymorphism 3D.
+///
+/// Explica al usuario con transparencia y estética de arcilla suave por qué
+/// la app requiere la Ubicación (precios y cercanía de comercios) y la Cámara
+/// (escaneo de códigos de barra), antes de presentar los cuadros de diálogo
+/// nativos de Android.
+class AppPermissionsPrimerDialog extends StatelessWidget {
+  final bool needsLocation;
+  final bool needsCamera;
 
-  static Future<bool> checkAndRequestLocation(BuildContext context) async {
+  const AppPermissionsPrimerDialog({
+    super.key,
+    this.needsLocation = true,
+    this.needsCamera = true,
+  });
+
+  /// Comprueba el estado de permisos y, si falta al menos uno, muestra la
+  /// pantalla explicativa antes de solicitar los permisos nativos del sistema.
+  static Future<bool> checkAndRequestPermissions(BuildContext context) async {
     try {
-      var permission = await Geolocator.checkPermission();
-      if (permission == LocationPermission.always || permission == LocationPermission.whileInUse) {
+      final locStatus = await Permission.location.status;
+      final camStatus = await Permission.camera.status;
+
+      final isLocGranted = locStatus.isGranted || locStatus.isLimited;
+      final isCamGranted = camStatus.isGranted || camStatus.isLimited;
+
+      // Si ambos permisos ya fueron concedidos, no interrumpir al usuario
+      if (isLocGranted && isCamGranted) {
         return true;
       }
-      if (permission == LocationPermission.deniedForever) {
+
+      // Si alguno fue denegado permanentemente y el otro ya concedido, omitir
+      if (locStatus.isPermanentlyDenied && camStatus.isPermanentlyDenied) {
         return false;
       }
 
       if (!context.mounted) return false;
 
-      // Mostrar pantalla explicativa personalizada antes del diálogo del sistema
+      // Mostrar pantalla unificada con estética Claymorphism
       final accepted = await showDialog<bool>(
         context: context,
         barrierDismissible: true,
-        builder: (_) => const LocationPermissionPrimerDialog(),
+        builder: (_) => AppPermissionsPrimerDialog(
+          needsLocation: !isLocGranted && !locStatus.isPermanentlyDenied,
+          needsCamera: !isCamGranted && !camStatus.isPermanentlyDenied,
+        ),
       );
 
       if (accepted == true) {
-        permission = await Geolocator.requestPermission();
-        return permission == LocationPermission.always || permission == LocationPermission.whileInUse;
+        if (!isLocGranted && !locStatus.isPermanentlyDenied) {
+          await Permission.location.request();
+        }
+        if (!isCamGranted && !camStatus.isPermanentlyDenied) {
+          await Permission.camera.request();
+        }
+        return true;
       }
       return false;
     } catch (_) {
       return false;
     }
+  }
+
+  /// Método retrocompatible con llamadas previas
+  static Future<bool> checkAndRequestLocation(BuildContext context) async {
+    return checkAndRequestPermissions(context);
   }
 
   @override
@@ -45,66 +79,76 @@ class LocationPermissionPrimerDialog extends StatelessWidget {
 
     return Dialog(
       backgroundColor: Colors.transparent,
-      insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+      insetPadding: const EdgeInsets.symmetric(horizontal: 22, vertical: 20),
       child: ClaySquircleCard(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
+        padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 26),
         borderRadius: 32.0,
         baseColor: isDark ? const Color(0xFF1E293B) : const Color(0xFFFFFFFF),
         animateOnPress: false,
         child: Column(
           mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Ícono 3D de ubicación en arcilla esmeralda
-            Container(
-              width: 76,
-              height: 76,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: const RadialGradient(
-                  center: Alignment(-0.35, -0.35),
-                  colors: [
-                    Color(0xFF6EE7B7),
-                    Color(0xFF10B981),
-                    Color(0xFF047857),
-                  ],
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: const Color(0xFF10B981).withValues(alpha: 0.35),
-                    blurRadius: 18,
-                    offset: const Offset(0, 8),
-                  ),
-                ],
-              ),
-              child: const Icon(
-                Icons.location_on_rounded,
-                size: 42,
-                color: Colors.white,
-              ),
-            ),
-            const SizedBox(height: 20),
+            // 1. Título principal y subtítulo
             Text(
-              'Ubicación para Ahorrar',
+              'Optimizá tu Ahorro',
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w800,
+                fontSize: 21,
+                fontWeight: FontWeight.w900,
                 color: isDark ? Colors.white : const Color(0xFF0F172A),
                 letterSpacing: -0.4,
               ),
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 6),
             Text(
-              'CompraMas compara precios reales de los supermercados y estaciones de combustible más cercanos a ti para que nunca pagues de más.',
+              'Para comparar precios en tiempo real y encontrar las mejores ofertas cerca de ti:',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 13,
-                height: 1.45,
                 fontWeight: FontWeight.w500,
-                color: isDark ? Colors.white.withValues(alpha: 0.7) : const Color(0xFF475569),
+                color: isDark
+                    ? Colors.white.withValues(alpha: 0.65)
+                    : const Color(0xFF64748B),
+                height: 1.35,
               ),
             ),
+
+            const SizedBox(height: 20),
+
+            // 2. Tarjeta de Ubicación (3D Claymorphic)
+            _PermissionFeatureTile(
+              isDark: isDark,
+              accentGradient: const [
+                Color(0xFF34D399),
+                Color(0xFF10B981),
+                Color(0xFF047857),
+              ],
+              icon: Icons.location_on_rounded,
+              title: 'Ubicación en Tiempo Real',
+              description:
+                  'Detecta los supermercados, comercios y estaciones de combustible más cercanos con sus mejores precios.',
+            ),
+
+            const SizedBox(height: 12),
+
+            // 3. Tarjeta de Cámara (3D Claymorphic)
+            _PermissionFeatureTile(
+              isDark: isDark,
+              accentGradient: const [
+                Color(0xFF818CF8),
+                Color(0xFF6366F1),
+                Color(0xFF4338CA),
+              ],
+              icon: Icons.qr_code_scanner_rounded,
+              title: 'Cámara para Escanear',
+              description:
+                  'Escanea códigos de barras directamente en la góndola para comparar precios al instante entre cadenas.',
+            ),
+
             const SizedBox(height: 24),
+
+            // 4. Botones de Acción
             Row(
               children: [
                 Expanded(
@@ -114,11 +158,13 @@ class LocationPermissionPrimerDialog extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(vertical: 14),
                     ),
                     child: Text(
-                      'Ahora no',
+                      'Más tarde',
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
-                        color: isDark ? Colors.white60 : const Color(0xFF64748B),
+                        color: isDark
+                            ? Colors.white60
+                            : const Color(0xFF64748B),
                       ),
                     ),
                   ),
@@ -134,12 +180,15 @@ class LocationPermissionPrimerDialog extends StatelessWidget {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
                       ),
-                      elevation: 4,
+                      elevation: 3,
                     ),
                     onPressed: () => Navigator.of(context).pop(true),
                     child: const Text(
-                      'Activar Ubicación',
-                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                      'Continuar y Activar',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w800,
+                      ),
                     ),
                   ),
                 ),
@@ -147,6 +196,99 @@ class LocationPermissionPrimerDialog extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Alias para mantener retrocompatibilidad exacta
+typedef LocationPermissionPrimerDialog = AppPermissionsPrimerDialog;
+
+class _PermissionFeatureTile extends StatelessWidget {
+  final bool isDark;
+  final List<Color> accentGradient;
+  final IconData icon;
+  final String title;
+  final String description;
+
+  const _PermissionFeatureTile({
+    required this.isDark,
+    required this.accentGradient,
+    required this.icon,
+    required this.title,
+    required this.description,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: isDark
+            ? Colors.white.withValues(alpha: 0.05)
+            : const Color(0xFFF1F5F9),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: isDark
+              ? Colors.white.withValues(alpha: 0.08)
+              : const Color(0xFFE2E8F0),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Ícono 3D inflado de arcilla
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: RadialGradient(
+                center: const Alignment(-0.35, -0.35),
+                colors: accentGradient,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: accentGradient[1].withValues(alpha: 0.35),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Icon(icon, size: 24, color: Colors.white),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w800,
+                    color: isDark ? Colors.white : const Color(0xFF0F172A),
+                    letterSpacing: -0.2,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  description,
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                    color: isDark
+                        ? Colors.white.withValues(alpha: 0.65)
+                        : const Color(0xFF475569),
+                    height: 1.3,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

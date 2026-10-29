@@ -39,13 +39,13 @@ class _BentoHomeScreenState extends State<BentoHomeScreen> {
       // 1. Inicialización diferida de redes publicitarias tras renderizar la UI
       unawaited(AdManager.instance.initialize());
 
-      // 2. Verificación de permisos de ubicación mediante el diálogo Primer Claymorphic
-      _checkLocationPrimer();
+      // 2. Verificación unificada de permisos (Ubicación y Cámara) mediante el diálogo Primer Claymorphic
+      _checkAppPermissionsPrimer();
     });
   }
 
-  Future<void> _checkLocationPrimer() async {
-    await LocationPermissionPrimerDialog.checkAndRequestLocation(context);
+  Future<void> _checkAppPermissionsPrimer() async {
+    await AppPermissionsPrimerDialog.checkAndRequestPermissions(context);
   }
 
   void _navigateTo(Widget screen) {

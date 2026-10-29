@@ -125,7 +125,7 @@ class AppPermissionsPrimerDialog extends StatelessWidget {
                 Color(0xFF047857),
               ],
               icon: Icons.location_on_rounded,
-              title: 'Ubicación en Tiempo Real',
+              title: 'Ubicación',
               description:
                   'Detecta los supermercados, comercios y estaciones de combustible más cercanos con sus mejores precios.',
             ),

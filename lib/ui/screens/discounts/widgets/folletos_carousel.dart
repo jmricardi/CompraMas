@@ -103,6 +103,69 @@ class _FolletoCard extends StatelessWidget {
     required this.onTap,
   });
 
+  String get _effectiveImageUrl {
+    if (folleto.portadaUrl.isNotEmpty && !folleto.portadaUrl.toLowerCase().endsWith('.pdf')) {
+      return folleto.portadaUrl;
+    }
+    for (final page in folleto.paginasUrls) {
+      if (page.isNotEmpty && !page.toLowerCase().endsWith('.pdf')) {
+        return page;
+      }
+    }
+    return '';
+  }
+
+  Widget _buildFallbackCover(Color colorBadge) {
+    final bool isPdf = folleto.portadaUrl.toLowerCase().endsWith('.pdf') ||
+        folleto.paginasUrls.any((u) => u.toLowerCase().endsWith('.pdf'));
+
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            colorBadge.withValues(alpha: 0.85),
+            colorBadge,
+          ],
+        ),
+      ),
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                isPdf ? Icons.picture_as_pdf_rounded : Icons.auto_stories_rounded,
+                size: 38,
+                color: Colors.white,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                isPdf ? 'Catálogo PDF' : folleto.cadena,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 12,
+                ),
+              ),
+              const SizedBox(height: 2),
+              const Text(
+                'Toca para abrir',
+                style: TextStyle(
+                  color: Colors.white70,
+                  fontSize: 10,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   String _formatearVigencia() {
     final DateTime targetDate;
     if (folleto.fechaHasta != null) {
@@ -167,29 +230,29 @@ class _FolletoCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Portada WebP desde Supabase Storage
+              // Portada WebP o Respaldo Inteligente de Cadena
               Expanded(
                 child: Stack(
                   fit: StackFit.expand,
                   children: [
-                    CachedNetworkImage(
-                      imageUrl: folleto.portadaUrl,
-                      fit: BoxFit.cover,
-                      placeholder: (_, _) => Container(
-                        color: Colors.grey.shade200,
-                        child: const Center(
-                          child: SizedBox(
-                            width: 24,
-                            height: 24,
-                            child: CircularProgressIndicator(strokeWidth: 2),
+                    if (_effectiveImageUrl.isNotEmpty && !_effectiveImageUrl.toLowerCase().endsWith('.pdf'))
+                      CachedNetworkImage(
+                        imageUrl: _effectiveImageUrl,
+                        fit: BoxFit.cover,
+                        placeholder: (_, _) => Container(
+                          color: Colors.grey.shade200,
+                          child: const Center(
+                            child: SizedBox(
+                              width: 24,
+                              height: 24,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            ),
                           ),
                         ),
-                      ),
-                      errorWidget: (context, url, error) => Container(
-                        color: Colors.grey.shade100,
-                        child: const Icon(Icons.broken_image, color: Colors.grey),
-                      ),
-                    ),
+                        errorWidget: (context, url, error) => _buildFallbackCover(colorBadge),
+                      )
+                    else
+                      _buildFallbackCover(colorBadge),
                     // Badge Cadena y Badge Bancario
                     Positioned(
                       top: 8,

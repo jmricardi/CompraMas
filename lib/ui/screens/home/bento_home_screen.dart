@@ -6,9 +6,9 @@ import '../../components/location_permission_primer.dart';
 import '../../components/ads/compramas_banner_ad.dart';
 import 'widgets/hero_search_scan_card.dart';
 import 'widgets/bento_secondary_cards.dart';
-import '../scan/scan_screen.dart';
-import '../scan/scanner_view.dart';
+import 'widgets/search_price_modal_sheet.dart';
 import '../shopping_list/shopping_lists_screen.dart';
+import '../assistant/shopping_assistant_screen.dart';
 import '../discounts/offers_screen.dart';
 import '../discounts/promotions_screen.dart';
 import '../fuel/fuel_map_screen.dart';
@@ -69,26 +69,6 @@ class _BentoHomeScreenState extends State<BentoHomeScreen> {
     );
   }
 
-  void _openBarcodeScanner() {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (ctx) => ClipRRect(
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
-        child: SizedBox(
-          height: MediaQuery.sizeOf(ctx).height * 0.82,
-          child: ScannerView(
-            onBarcodeScanned: (barcode) {
-              Navigator.of(ctx).pop();
-              _navigateTo(const ScanScreen());
-            },
-          ),
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -118,17 +98,14 @@ class _BentoHomeScreenState extends State<BentoHomeScreen> {
 
                     const SizedBox(height: 18),
 
-                    // 2. Bloque Hero: Buscar y Escanear (Abre pantalla por encima con autofoco)
+                    // 2. Bloque Hero: Buscar y Escanear (Abre ventana modal interactiva con variedades y precios)
                     HeroSearchScanCard(
-                      onSearchTap: () => _navigateTo(
-                        const ScanScreen(autoFocus: true),
-                      ),
-                      onScanBarcodeTap: _openBarcodeScanner,
+                      onTap: () => SearchPriceModalSheet.show(context),
                     ),
 
                     const SizedBox(height: 16),
 
-                    // 3. Fila 1: Mi Lista & Ofertas y Folletos
+                    // 3. Fila 1: Mi Lista & Asistente Compra
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -141,9 +118,9 @@ class _BentoHomeScreenState extends State<BentoHomeScreen> {
                         ),
                         const SizedBox(width: 14),
                         Expanded(
-                          child: BentoOffersCard(
+                          child: BentoShoppingAssistantCard(
                             onTap: () => _navigateTo(
-                              const OffersScreen(),
+                              const ShoppingAssistantScreen(),
                             ),
                           ),
                         ),
@@ -152,10 +129,18 @@ class _BentoHomeScreenState extends State<BentoHomeScreen> {
 
                     const SizedBox(height: 14),
 
-                    // 4. Fila 2: Descuentos Bancarios & Combustible
+                    // 4. Fila 2: Ofertas y Folletos & Descuentos Bancarios
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        Expanded(
+                          child: BentoOffersCard(
+                            onTap: () => _navigateTo(
+                              const OffersScreen(),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 14),
                         Expanded(
                           child: BentoDiscountsCard(
                             onTap: () => _navigateTo(
@@ -163,7 +148,15 @@ class _BentoHomeScreenState extends State<BentoHomeScreen> {
                             ),
                           ),
                         ),
-                        const SizedBox(width: 14),
+                      ],
+                    ),
+
+                    const SizedBox(height: 14),
+
+                    // 5. Fila 3: Combustible & Ajustes
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
                         Expanded(
                           child: BentoFuelCard(
                             onTap: () => _navigateTo(
@@ -171,16 +164,15 @@ class _BentoHomeScreenState extends State<BentoHomeScreen> {
                             ),
                           ),
                         ),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: BentoSettingsCard(
+                            onTap: () => _navigateTo(
+                              const SettingsScreen(),
+                            ),
+                          ),
+                        ),
                       ],
-                    ),
-
-                    const SizedBox(height: 14),
-
-                    // 5. Fila 3: Ajustes
-                    BentoSettingsCard(
-                      onTap: () => _navigateTo(
-                        const SettingsScreen(),
-                      ),
                     ),
                   ],
                 ),

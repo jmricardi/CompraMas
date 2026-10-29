@@ -52,7 +52,7 @@ internal fun MainActivity.showBottomBanner() {
             if (MainActivity.isMetaEnabled && (now - MainActivity.lastMetaBottomBannerRequestTime >= MainActivity.META_COOLDOWN_MS)) {
                 MainActivity.lastMetaBottomBannerRequestTime = now
                 Log.i("MetaAds", "Intentando cargar Meta Bottom Banner...")
-                val metaBannerUnitId = "27595713640125055_27595765613453191"
+                val metaBannerUnitId = "2395334841254681_2395336131254552"
                 bannerEventSink?.success(mapOf(
                     "event" to "requesting",
                     "network" to "Meta Audience Network",

@@ -52,6 +52,99 @@ class BentoShoppingListCard extends StatelessWidget {
 }
 
 // ============================================================================
+// 1.1 ASISTENTE COMPRA (Ícono 3D centrado + Texto al pie)
+// ============================================================================
+
+class BentoShoppingAssistantCard extends StatelessWidget {
+  final VoidCallback onTap;
+
+  const BentoShoppingAssistantCard({super.key, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final baseColor = isDark ? const Color(0xFF042F2E) : const Color(0xFFF0FDFA);
+    final titleColor = isDark ? const Color(0xFF99F6E4) : const Color(0xFF0D9488);
+
+    return ClaySquircleCard(
+      baseColor: baseColor,
+      borderRadius: 28.0,
+      accentColor: const Color(0xFF14B8A6),
+      padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 16.0),
+      onTap: onTap,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          const SizedBox(height: 6),
+          const Center(
+            child: Clay3DAssistantIcon(size: 54.0),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'Asistente Compra',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w800,
+              color: titleColor,
+              letterSpacing: -0.3,
+            ),
+          ),
+          const SizedBox(height: 2),
+        ],
+      ),
+    );
+  }
+}
+
+/// Ícono 3D de arcilla para Asistente Inteligente de Compra
+class Clay3DAssistantIcon extends StatelessWidget {
+  final double size;
+
+  const Clay3DAssistantIcon({super.key, this.size = 54.0});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: const RadialGradient(
+          center: Alignment(-0.35, -0.35),
+          colors: [
+            Color(0xFF5EEAD4),
+            Color(0xFF14B8A6),
+            Color(0xFF0F766E),
+          ],
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF14B8A6).withValues(alpha: 0.35),
+            blurRadius: 12,
+            offset: const Offset(0, 5),
+          ),
+          const BoxShadow(
+            color: Colors.white60,
+            blurRadius: 4,
+            offset: Offset(-2, -2),
+          ),
+        ],
+      ),
+      child: Center(
+        child: Icon(
+          Icons.auto_awesome_rounded,
+          size: size * 0.54,
+          color: Colors.white,
+        ),
+      ),
+    );
+  }
+}
+
+// ============================================================================
 // 2. OFERTAS Y FOLLETOS (Ícono 3D centrado + Texto al pie)
 // ============================================================================
 

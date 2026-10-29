@@ -395,7 +395,7 @@ class MetaMrecPlatformView(
             loadYandexFallback()
             return
         }
-        val META_MREC_ID = "27595713640125055_27595774360118983"
+        val META_MREC_ID = "2395334841254681_2395337271254438"
         activity.runOnUiThread {
             methodChannel.invokeMethod("onAdStep", mapOf(
                 "step" to "1/2",

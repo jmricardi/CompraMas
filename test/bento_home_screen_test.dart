@@ -39,9 +39,12 @@ void main() {
       expect(find.byType(HeroSearchScanCard), findsOneWidget);
       expect(find.text('Buscar y Escanear'), findsOneWidget);
 
-      // 3. Verifica los 5 bloques secundarios del tablero Bento
+      // 3. Verifica los bloques secundarios del tablero Bento
       expect(find.byType(BentoShoppingListCard), findsOneWidget);
       expect(find.text('Mi Lista'), findsOneWidget);
+
+      expect(find.byType(BentoShoppingAssistantCard), findsOneWidget);
+      expect(find.text('Asistente Compra'), findsOneWidget);
 
       expect(find.byType(BentoOffersCard), findsOneWidget);
       expect(find.text('Ofertas'), findsOneWidget);

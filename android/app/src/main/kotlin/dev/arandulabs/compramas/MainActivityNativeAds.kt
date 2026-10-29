@@ -23,8 +23,8 @@ internal fun MainActivity.loadNative(isMediaOnly: Boolean = false, isRetryFallba
     val lastMetaRequest = if (isMediaOnly) MainActivity.lastMetaNativeFeedRequestTime else MainActivity.lastMetaNativeAnalysisRequestTime
     val metaCooldownActive = (now - lastMetaRequest) < MainActivity.META_COOLDOWN_MS
     
-    val META_NATIVE_FEED_ID = "27595713640125055_28152047594491654"
-    val META_NATIVE_COMPACT_ID = "27595713640125055_27595776730118746"
+    val META_NATIVE_FEED_ID = "2395334841254681_2395336907921141"
+    val META_NATIVE_COMPACT_ID = "2395334841254681_2395336424587856"
     
     if (MainActivity.isMetaEnabled && !metaCooldownActive && !isRetryFallback) {
         if (isMediaOnly) {

@@ -569,8 +569,8 @@ class _FuelMapScreenState extends State<FuelMapScreen> with TickerProviderStateM
           // Botones de control del mapa (Mi ubicación, Zoom +, Zoom -)
           if (hasMap)
             Positioned(
-              right: 16,
-              bottom: viewModel.selectedStation != null ? 210 : 24,
+              top: 116,
+              right: 14,
               child: MapControlButtons(
                 onLocation: _centerOnUserLocation,
                 onZoomIn: _zoomIn,

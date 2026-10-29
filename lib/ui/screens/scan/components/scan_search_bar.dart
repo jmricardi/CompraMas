@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 /// Barra de búsqueda personalizada con soporte para navegación hacia atrás,
-/// limpieza de texto, búsqueda por voz y escaneo por cámara.
+/// limpieza de texto y escaneo directo por cámara.
 class ScanSearchBar extends StatelessWidget {
   final TextEditingController controller;
   final FocusNode focusNode;
@@ -10,7 +10,6 @@ class ScanSearchBar extends StatelessWidget {
   final ValueChanged<String> onSubmitted;
   final VoidCallback onBackToSearch;
   final VoidCallback onClear;
-  final VoidCallback onVoiceSearch;
   final VoidCallback onScanner;
 
   const ScanSearchBar({
@@ -22,7 +21,6 @@ class ScanSearchBar extends StatelessWidget {
     required this.onSubmitted,
     required this.onBackToSearch,
     required this.onClear,
-    required this.onVoiceSearch,
     required this.onScanner,
   });
 
@@ -90,18 +88,6 @@ class ScanSearchBar extends StatelessWidget {
                 splashRadius: 18,
                 onPressed: onClear,
               ),
-            Container(
-              height: 24,
-              width: 1,
-              color: const Color(0xFFE2E8F0),
-              margin: const EdgeInsets.symmetric(horizontal: 2),
-            ),
-            IconButton(
-              icon: Icon(Icons.mic_none_rounded, color: theme.colorScheme.primary),
-              tooltip: 'Búsqueda por voz',
-              splashRadius: 20,
-              onPressed: onVoiceSearch,
-            ),
             Container(
               height: 24,
               width: 1,

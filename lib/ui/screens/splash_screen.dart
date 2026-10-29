@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:record/record.dart';
 import 'main_scaffold_screen.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -26,13 +25,6 @@ class _SplashScreenState extends State<SplashScreen> {
       if (locStatus == LocationPermission.denied) {
         await Geolocator.requestPermission();
       }
-    } catch (_) {}
-
-    try {
-      // 2. Permiso de micrófono inicial (hasPermission solicita al sistema si no fue otorgado)
-      final recorder = AudioRecorder();
-      await recorder.hasPermission();
-      recorder.dispose();
     } catch (_) {}
   }
 

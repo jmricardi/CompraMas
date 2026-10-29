@@ -7,13 +7,11 @@ import 'package:compramas/viewmodels/scanner_viewmodel.dart';
 
 class SearchIdleView extends StatelessWidget {
   final VoidCallback onScan;
-  final VoidCallback? onVoiceSearch;
   final ValueChanged<String> onQuickSearch;
 
   const SearchIdleView({
     super.key,
     required this.onScan,
-    this.onVoiceSearch,
     required this.onQuickSearch,
   });
 
@@ -66,7 +64,7 @@ class SearchIdleView extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              'Usa la barra superior para escribir el nombre, hablar por micrófono o escanear con la cámara.',
+              'Usa la barra superior para escribir el nombre o escanear con la cámara.',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 13,
@@ -186,4 +184,3 @@ class ScanErrorView extends StatelessWidget {
     );
   }
 }
-

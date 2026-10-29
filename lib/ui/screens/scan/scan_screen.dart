@@ -8,7 +8,6 @@ import '../../components/app_header_top_bar.dart';
 import 'scanner_view.dart';
 import 'components/scan_states_views.dart';
 import 'components/scan_success_view.dart';
-import 'components/voice_search_dialog.dart';
 import 'components/scan_search_bar.dart';
 import 'components/suggestions_overlay.dart';
 import 'components/cluster_confirmation_dialog.dart';
@@ -226,22 +225,6 @@ class _ScanScreenState extends State<ScanScreen> {
     );
   }
 
-  Future<void> _openVoiceSearch(BuildContext context) async {
-    _debounceTimer?.cancel();
-    _searchFocusNode.unfocus();
-    setState(() {
-      _suggestions = [];
-    });
-
-    final transcribed = await VoiceSearchDialog.show(context);
-    if (!mounted || transcribed == null || transcribed.trim().isEmpty) return;
-
-    final query = transcribed.trim();
-    _searchController.text = query;
-    _onSearchChanged(query);
-    _onSearchSubmitted(query);
-  }
-
   void _onBackToSearch() {
     _debounceTimer?.cancel();
     _searchController.clear();
@@ -285,7 +268,6 @@ class _ScanScreenState extends State<ScanScreen> {
                 _searchController.clear();
                 _onSearchChanged('');
               },
-              onVoiceSearch: () => _openVoiceSearch(context),
               onScanner: () => _openScanner(context),
             ),
             // Contenedor principal con overlay de sugerencias predictivas
@@ -295,7 +277,6 @@ class _ScanScreenState extends State<ScanScreen> {
                   switch (viewModel.status) {
                     ScanStatus.idle => SearchIdleView(
                         onScan: () => _openScanner(context),
-                        onVoiceSearch: () => _openVoiceSearch(context),
                         onQuickSearch: (q) {
                           _searchController.text = q;
                           _onSearchChanged(q);

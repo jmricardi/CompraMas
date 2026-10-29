@@ -7,7 +7,6 @@ list(APPEND FLUTTER_PLUGIN_LIST
   firebase_core
   firebase_remote_config
   geolocator_windows
-  record_windows
   url_launcher_windows
 )
 

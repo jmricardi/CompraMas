@@ -1,0 +1,6 @@
+# Configuración de firma de subida para Google Play Store
+# Completa con la contraseña que definiste al crear upload-keystore.jks
+storePassword=TU_PASSWORD_AQUI
+keyPassword=TU_PASSWORD_AQUI
+keyAlias=upload
+storeFile=upload-keystore.jks

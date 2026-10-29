@@ -1,0 +1,6 @@
+{
+  "name": "CompraMas",
+  "description": "Comparador de precios y asistente para compras inteligentes.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

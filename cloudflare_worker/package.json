@@ -1,0 +1,14 @@
+{
+  "name": "compramas-edge-gateway",
+  "version": "1.0.0",
+  "description": "Zero-Trust Edge API Gateway para Supabase en Cloudflare Workers",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy"
+  },
+  "devDependencies": {
+    "wrangler": "^3.111.0"
+  }
+}

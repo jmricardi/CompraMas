@@ -1,0 +1,181 @@
+<com.yandex.mobile.ads.nativeads.NativeAdView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/native_ad_view_compact"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="0dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <!-- 1. Slot Visual Izquierdo (78x78 dp): Icono o Media pequeña con Feedback sobrepuesto -->
+        <FrameLayout
+            android:layout_width="78dp"
+            android:layout_height="78dp"
+            android:layout_gravity="center_vertical"
+            android:layout_marginEnd="10dp">
+
+            <ImageView
+                android:id="@+id/native_icon_view"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"
+                android:contentDescription="Ad Icon"
+                android:visibility="visible" />
+
+            <com.yandex.mobile.ads.nativeads.MediaView
+                android:id="@+id/native_media_view_compact"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:visibility="visible" />
+
+            <!-- Feedback Icon sobrepuesto en la esquina superior izquierda del icono -->
+            <ImageView
+                android:id="@+id/native_compact_feedback_view"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_gravity="top|start"
+                android:scaleType="centerInside"
+                android:contentDescription="Feedback menu"
+                android:visibility="visible" />
+        </FrameLayout>
+
+        <!-- 2. Contenedor Derecho: Textos, Dominio y CTA -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:layout_gravity="center_vertical"
+            android:gravity="center_vertical">
+
+            <!-- Fila 1: Badge 'AD' + Título -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:id="@+id/native_compact_ad_attribution"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="6dp"
+                    android:paddingStart="6dp"
+                    android:paddingEnd="6dp"
+                    android:paddingTop="2dp"
+                    android:paddingBottom="2dp"
+                    android:gravity="center"
+                    android:includeFontPadding="false"
+                    android:background="@drawable/bg_ad_badge"
+                    android:textColor="#BDBDC5"
+                    android:textSize="9sp"
+                    android:textStyle="bold"
+                    android:text="AD" />
+
+                <TextView
+                    android:id="@+id/native_title_view"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:includeFontPadding="false"
+                    android:maxLines="1"
+                    android:ellipsize="end"
+                    android:textColor="#FFFFFF"
+                    android:textSize="13sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <!-- Fila 2: Dominio -->
+            <TextView
+                android:id="@+id/native_domain_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:includeFontPadding="false"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:textColor="#00E5FF"
+                android:textSize="10sp"
+                android:visibility="visible" />
+
+            <!-- Fila 3: Descripción de 1 línea -->
+            <TextView
+                android:id="@+id/native_description_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:includeFontPadding="false"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:textColor="#BDBDC5"
+                android:textSize="11sp"
+                android:visibility="visible" />
+
+            <!-- Fila 4: Rating + Botón CTA -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <RatingBar
+                    android:id="@+id/native_rating_bar"
+                    style="?android:attr/ratingBarStyleSmall"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:numStars="5"
+                    android:stepSize="0.5"
+                    android:isIndicator="true"
+                    android:progressTint="#FFB800"
+                    android:secondaryProgressTint="#FFB800" />
+
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="1dp"
+                    android:layout_weight="1" />
+
+                <Button
+                    android:id="@+id/native_cta_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="28dp"
+                    android:layout_marginStart="6dp"
+                    android:backgroundTint="#00E5FF"
+                    android:textColor="#000000"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    android:gravity="center"
+                    android:includeFontPadding="false"
+                    android:insetTop="0dp"
+                    android:insetBottom="0dp"
+                    android:paddingTop="0dp"
+                    android:paddingBottom="0dp"
+                    android:paddingStart="10dp"
+                    android:paddingEnd="10dp"
+                    android:minWidth="0dp"
+                    android:minHeight="0dp"
+                    android:textAllCaps="false" />
+            </LinearLayout>
+
+            <!-- Warning -->
+            <TextView
+                android:id="@+id/native_warning_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:textColor="#BDBDC5"
+                android:textSize="8sp"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:visibility="visible" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</com.yandex.mobile.ads.nativeads.NativeAdView>

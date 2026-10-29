@@ -1,0 +1,61 @@
+# Flutter / Dart
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+build/
+app/build/
+**/build/
+ephemeral/
+*.apk
+*.idsig
+*.aab
+*.dill
+flutter_export_environment.sh
+
+# IDEs & Gradle & OS
+*.iml
+.gradle/
+**/.gradle/
+.kotlin/
+/local.properties
+.idea/
+**/.idea/
+.DS_Store
+/captures
+.externalNativeBuild
+.cxx
+local.properties
+
+# Secrets & Config
+.env
+debug.keystore
+config.json
+*.jks
+*.keystore
+key.properties
+/android/key.properties
+
+# Python
+__pycache__/
+**/__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Large Datasets & Raw Dumps & Backups (> 100MB / non-code)
+*.zip
+*.parquet
+*.csv
+Bases de Datos Precios/
+backup/
+ingesta/data/
+ingesta/respuestas/
+ingesta/lotes/
+ingesta/scratch/
+**/data/raw/
+**/data/processed/
+
+# Wrangler / Node
+node_modules/
+.wrangler/

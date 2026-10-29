@@ -1,0 +1,19 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "compramas-api-gateway",
+  "main": "src/index.js",
+  "compatibility_date": "2024-10-01",
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
+  "routes": [
+    {
+      "pattern": "api-compramas.arandulabs.dev/*",
+      "zone_id": "f20a9c32a2e0af64b8be850ac448edbf"
+    }
+  ],
+  "vars": {
+    "ENVIRONMENT": "production",
+    "CACHE_ENABLED": "true"
+  }
+}

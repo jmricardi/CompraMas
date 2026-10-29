@@ -1,0 +1,689 @@
+[
+  {
+    "id": "arg_carne_asado",
+    "nombre": "Carne vacuna, asado",
+    "categoria": "carnes",
+    "keywords": ["asado", "tira de asado", "asado de tira", "tira asado"],
+    "exento_ley_27642": true,
+    "nova_group": 1,
+    "nutriscore_grade": "b",
+    "por_100g": {
+      "energia_kcal": 255.0,
+      "proteinas_g": 19.5,
+      "grasas_totales_g": 19.2,
+      "grasas_saturadas_g": 8.1,
+      "carbohidratos_g": 0.0,
+      "azucares_g": 0.0,
+      "fibra_g": 0.0,
+      "sodio_mg": 68.0
+    }
+  },
+  {
+    "id": "arg_carne_vacio",
+    "nombre": "Carne vacuna, vacío",
+    "categoria": "carnes",
+    "keywords": ["vacio", "corte vacio"],
+    "exento_ley_27642": true,
+    "nova_group": 1,
+    "nutriscore_grade": "b",
+    "por_100g": {
+      "energia_kcal": 218.0,
+      "proteinas_g": 20.8,
+      "grasas_totales_g": 14.5,
+      "grasas_saturadas_g": 6.2,
+      "carbohidratos_g": 0.0,
+      "azucares_g": 0.0,
+      "fibra_g": 0.0,
+      "sodio_mg": 62.0
+    }
+  },
+  {
+    "id": "arg_carne_matambre",
+    "nombre": "Carne vacuna, matambre",
+    "categoria": "carnes",
+    "keywords": ["matambre", "matambre vacuno"],
+    "exento_ley_27642": true,
+    "nova_group": 1,
+    "nutriscore_grade": "b",
+    "por_100g": {
+      "energia_kcal": 230.0,
+      "proteinas_g": 19.8,
+      "grasas_totales_g": 16.5,
+      "grasas_saturadas_g": 7.0,
+      "carbohidratos_g": 0.0,
+      "azucares_g": 0.0,
+      "fibra_g": 0.0,
+      "sodio_mg": 65.0
+    }
+  },
+  {
+    "id": "arg_carne_picada_comun",
+    "nombre": "Carne vacuna, picada común",
+    "categoria": "carnes",
+    "keywords": ["carne picada", "picada comun", "picada vacuna", "picada especial"],
+    "exento_ley_27642": true,
+    "nova_group": 1,
+    "nutriscore_grade": "b",
+    "por_100g": {
+      "energia_kcal": 215.0,
+      "proteinas_g": 18.5,
+      "grasas_totales_g": 15.3,
+      "grasas_saturadas_g": 6.5,
+      "carbohidratos_g": 0.0,
+      "azucares_g": 0.0,
+      "fibra_g": 0.0,
+      "sodio_mg": 70.0
+    }
+  },
+  {
+    "id": "arg_carne_lomo",
+    "nombre": "Carne vacuna, lomo / bife de chorizo",
+    "categoria": "carnes",
+    "keywords": ["lomo", "bife de chorizo", "ojo de bife", "bife angosto"],
+    "exento_ley_27642": true,
+    "nova_group": 1,
+    "nutriscore_grade": "a",
+    "por_100g": {
+      "energia_kcal": 145.0,
+      "proteinas_g": 22.1,
+      "grasas_totales_g": 5.8,
+      "grasas_saturadas_g": 2.4,
+      "carbohidratos_g": 0.0,
+      "azucares_g": 0.0,
+      "fibra_g": 0.0,
+      "sodio_mg": 58.0
+    }
+  },
+  {
+    "id": "arg_carne_nalga_milanesa",
+    "nombre": "Carne vacuna, nalga / bola de lomo / cuadril",
+    "categoria": "carnes",
+    "keywords": ["nalga", "bola de lomo", "cuadril", "peceto", "cuadrada", "milanesa carne"],
+    "exento_ley_27642": true,
+    "nova_group": 1,
+    "nutriscore_grade": "a",
+    "por_100g": {
+      "energia_kcal": 138.0,
+      "proteinas_g": 21.8,
+      "grasas_totales_g": 5.2,
+      "grasas_saturadas_g": 2.1,
+      "carbohidratos_g": 0.0,
+      "azucares_g": 0.0,
+      "fibra_g": 0.0,
+      "sodio_mg": 55.0
+    }
+  },
+  {
+    "id": "arg_pollo_entero",
+    "nombre": "Pollo entero / pata y muslo",
+    "categoria": "carnes",
+    "keywords": ["pollo", "pata y muslo", "pollo entero", "cuarto trasero"],
+    "exento_ley_27642": true,
+    "nova_group": 1,
+    "nutriscore_grade": "b",
+    "por_100g": {
+      "energia_kcal": 170.0,
+      "proteinas_g": 18.2,
+      "grasas_totales_g": 10.5,
+      "grasas_saturadas_g": 3.1,
+      "carbohidratos_g": 0.0,
+      "azucares_g": 0.0,
+      "fibra_g": 0.0,
+      "sodio_mg": 75.0
+    }
+  },
+  {
+    "id": "arg_pollo_pechuga",
+    "nombre": "Pollo, pechuga deshuesada",
+    "categoria": "carnes",
+    "keywords": ["pechuga", "suprema", "pechuga de pollo", "suprema de pollo"],
+    "exento_ley_27642": true,
+    "nova_group": 1,
+    "nutriscore_grade": "a",
+    "por_100g": {
+      "energia_kcal": 120.0,
+      "proteinas_g": 23.5,
+      "grasas_totales_g": 2.6,
+      "grasas_saturadas_g": 0.8,
+      "carbohidratos_g": 0.0,
+      "azucares_g": 0.0,
+      "fibra_g": 0.0,
+      "sodio_mg": 65.0
+    }
+  },
+  {
+    "id": "arg_cerdo_pechito_bondiola",
+    "nombre": "Carne de cerdo, pechito / bondiola / carré",
+    "categoria": "carnes",
+    "keywords": ["cerdo", "pechito de cerdo", "bondiola", "carre de cerdo", "costillita de cerdo"],
+    "exento_ley_27642": true,
+    "nova_group": 1,
+    "nutriscore_grade": "b",
+    "por_100g": {
+      "energia_kcal": 210.0,
+      "proteinas_g": 19.0,
+      "grasas_totales_g": 14.5,
+      "grasas_saturadas_g": 5.2,
+      "carbohidratos_g": 0.0,
+      "azucares_g": 0.0,
+      "fibra_g": 0.0,
+      "sodio_mg": 70.0
+    }
+  },
+  {
+    "id": "arg_pescado_merluza",
+    "nombre": "Pescado, merluza filet",
+    "categoria": "pescados",
+    "keywords": ["merluza", "filet de merluza", "pescado filet"],
+    "exento_ley_27642": true,
+    "nova_group": 1,
+    "nutriscore_grade": "a",
+    "por_100g": {
+      "energia_kcal": 82.0,
+      "proteinas_g": 17.5,
+      "grasas_totales_g": 1.2,
+      "grasas_saturadas_g": 0.3,
+      "carbohidratos_g": 0.0,
+      "azucares_g": 0.0,
+      "fibra_g": 0.0,
+      "sodio_mg": 85.0
+    }
+  },
+  {
+    "id": "arg_huevo_gallina",
+    "nombre": "Huevo de gallina fresco",
+    "categoria": "huevos",
+    "keywords": ["huevo", "huevos", "maple de huevos", "huevos blancos", "huevos color"],
+    "exento_ley_27642": true,
+    "nova_group": 1,
+    "nutriscore_grade": "a",
+    "por_100g": {
+      "energia_kcal": 143.0,
+      "proteinas_g": 12.6,
+      "grasas_totales_g": 9.5,
+      "grasas_saturadas_g": 3.1,
+      "carbohidratos_g": 0.8,
+      "azucares_g": 0.4,
+      "fibra_g": 0.0,
+      "sodio_mg": 142.0
+    }
+  },
+  {
+    "id": "arg_leche_entera_fluida",
+    "nombre": "Leche entera fluida",
+    "categoria": "lacteos",
+    "keywords": ["leche entera", "leche sachet", "leche fluida", "leche carton", "leche uat entera", "leche uht entera"],
+    "ingredientes": "Leche entera, vitaminas A y D",
+    "exento_ley_27642": true,
+    "nova_group": 1,
+    "nutriscore_grade": "b",
+    "por_100g": {
+      "energia_kcal": 59.0,
+      "proteinas_g": 3.1,
+      "grasas_totales_g": 3.0,
+      "grasas_saturadas_g": 1.9,
+      "carbohidratos_g": 4.7,
+      "azucares_g": 4.7,
+      "fibra_g": 0.0,
+      "sodio_mg": 48.0
+    }
+  },
+  {
+    "id": "arg_leche_descremada_fluida",
+    "nombre": "Leche descremada fluida",
+    "categoria": "lacteos",
+    "keywords": ["leche descremada", "leche 0%", "leche parcialmente descremada", "leche 1%", "leche 2%"],
+    "ingredientes": "Leche descremada, vitaminas A y D",
+    "exento_ley_27642": true,
+    "nova_group": 1,
+    "nutriscore_grade": "a",
+    "por_100g": {
+      "energia_kcal": 42.0,
+      "proteinas_g": 3.2,
+      "grasas_totales_g": 1.5,
+      "grasas_saturadas_g": 0.9,
+      "carbohidratos_g": 4.8,
+      "azucares_g": 4.8,
+      "fibra_g": 0.0,
+      "sodio_mg": 50.0
+    }
+  },
+  {
+    "id": "arg_leche_deslactosada_fluida",
+    "nombre": "Leche deslactosada fluida",
+    "categoria": "lacteos",
+    "keywords": ["leche deslactosada", "leche 0% lactosa", "cero lactosa", "sin lactosa"],
+    "ingredientes": "Leche, enzima lactasa, vitaminas A y D",
+    "exento_ley_27642": true,
+    "nova_group": 1,
+    "nutriscore_grade": "b",
+    "por_100g": {
+      "energia_kcal": 56.0,
+      "proteinas_g": 3.1,
+      "grasas_totales_g": 2.5,
+      "grasas_saturadas_g": 1.5,
+      "carbohidratos_g": 4.7,
+      "azucares_g": 4.7,
+      "fibra_g": 0.0,
+      "sodio_mg": 48.0
+    }
+  },
+  {
+    "id": "arg_papa_comun",
+    "nombre": "Papa blanca / negra fresca",
+    "categoria": "verduras",
+    "keywords": ["papa", "papa negra", "papa blanca", "patata"],
+    "exento_ley_27642": true,
+    "nova_group": 1,
+    "nutriscore_grade": "a",
+    "por_100g": {
+      "energia_kcal": 77.0,
+      "proteinas_g": 2.0,
+      "grasas_totales_g": 0.1,
+      "grasas_saturadas_g": 0.0,
+      "carbohidratos_g": 17.5,
+      "azucares_g": 0.8,
+      "fibra_g": 2.2,
+      "sodio_mg": 6.0
+    }
+  },
+  {
+    "id": "arg_cebolla",
+    "nombre": "Cebolla fresca",
+    "categoria": "verduras",
+    "keywords": ["cebolla", "cebolla morada", "cebolla blanca"],
+    "exento_ley_27642": true,
+    "nova_group": 1,
+    "nutriscore_grade": "a",
+    "por_100g": {
+      "energia_kcal": 40.0,
+      "proteinas_g": 1.1,
+      "grasas_totales_g": 0.1,
+      "grasas_saturadas_g": 0.0,
+      "carbohidratos_g": 9.3,
+      "azucares_g": 4.2,
+      "fibra_g": 1.7,
+      "sodio_mg": 4.0
+    }
+  },
+  {
+    "id": "arg_tomate_redondo",
+    "nombre": "Tomate redondo / perita",
+    "categoria": "verduras",
+    "keywords": ["tomate", "tomate redondo", "tomate perita", "tomates"],
+    "exento_ley_27642": true,
+    "nova_group": 1,
+    "nutriscore_grade": "a",
+    "por_100g": {
+      "energia_kcal": 18.0,
+      "proteinas_g": 0.9,
+      "grasas_totales_g": 0.2,
+      "grasas_saturadas_g": 0.0,
+      "carbohidratos_g": 3.9,
+      "azucares_g": 2.6,
+      "fibra_g": 1.2,
+      "sodio_mg": 5.0
+    }
+  },
+  {
+    "id": "arg_zanahoria",
+    "nombre": "Zanahoria fresca",
+    "categoria": "verduras",
+    "keywords": ["zanahoria", "zanahorias"],
+    "exento_ley_27642": true,
+    "nova_group": 1,
+    "nutriscore_grade": "a",
+    "por_100g": {
+      "energia_kcal": 41.0,
+      "proteinas_g": 0.9,
+      "grasas_totales_g": 0.2,
+      "grasas_saturadas_g": 0.0,
+      "carbohidratos_g": 9.6,
+      "azucares_g": 4.7,
+      "fibra_g": 2.8,
+      "sodio_mg": 69.0
+    }
+  },
+  {
+    "id": "arg_lechuga",
+    "nombre": "Lechuga criolla / capuchina / mantecosa",
+    "categoria": "verduras",
+    "keywords": ["lechuga", "lechuga criolla", "lechuga mantecosa", "lechuga capuchina"],
+    "exento_ley_27642": true,
+    "nova_group": 1,
+    "nutriscore_grade": "a",
+    "por_100g": {
+      "energia_kcal": 15.0,
+      "proteinas_g": 1.4,
+      "grasas_totales_g": 0.2,
+      "grasas_saturadas_g": 0.0,
+      "carbohidratos_g": 2.8,
+      "azucares_g": 0.8,
+      "fibra_g": 1.3,
+      "sodio_mg": 28.0
+    }
+  },
+  {
+    "id": "arg_zapallito_verde",
+    "nombre": "Zapallito verde / zucchini",
+    "categoria": "verduras",
+    "keywords": ["zapallito", "zapallito verde", "zucchini"],
+    "exento_ley_27642": true,
+    "nova_group": 1,
+    "nutriscore_grade": "a",
+    "por_100g": {
+      "energia_kcal": 17.0,
+      "proteinas_g": 1.2,
+      "grasas_totales_g": 0.3,
+      "grasas_saturadas_g": 0.1,
+      "carbohidratos_g": 3.1,
+      "azucares_g": 2.2,
+      "fibra_g": 1.0,
+      "sodio_mg": 8.0
+    }
+  },
+  {
+    "id": "arg_calabaza_ancor",
+    "nombre": "Calabaza / anco / zapallo",
+    "categoria": "verduras",
+    "keywords": ["calabaza", "anco", "zapallo", "zapallo anco", "calabacin"],
+    "exento_ley_27642": true,
+    "nova_group": 1,
+    "nutriscore_grade": "a",
+    "por_100g": {
+      "energia_kcal": 26.0,
+      "proteinas_g": 1.0,
+      "grasas_totales_g": 0.1,
+      "grasas_saturadas_g": 0.0,
+      "carbohidratos_g": 6.5,
+      "azucares_g": 2.8,
+      "fibra_g": 1.5,
+      "sodio_mg": 1.0
+    }
+  },
+  {
+    "id": "arg_manzana_roja",
+    "nombre": "Manzana roja / verde fresca",
+    "categoria": "frutas",
+    "keywords": ["manzana", "manzana roja", "manzana deliciosa", "manzana verde", "manzanas"],
+    "exento_ley_27642": true,
+    "nova_group": 1,
+    "nutriscore_grade": "a",
+    "por_100g": {
+      "energia_kcal": 52.0,
+      "proteinas_g": 0.3,
+      "grasas_totales_g": 0.2,
+      "grasas_saturadas_g": 0.0,
+      "carbohidratos_g": 13.8,
+      "azucares_g": 10.4,
+      "fibra_g": 2.4,
+      "sodio_mg": 1.0
+    }
+  },
+  {
+    "id": "arg_banana",
+    "nombre": "Banana fresca",
+    "categoria": "frutas",
+    "keywords": ["banana", "bananas", "platano"],
+    "exento_ley_27642": true,
+    "nova_group": 1,
+    "nutriscore_grade": "a",
+    "por_100g": {
+      "energia_kcal": 89.0,
+      "proteinas_g": 1.1,
+      "grasas_totales_g": 0.3,
+      "grasas_saturadas_g": 0.1,
+      "carbohidratos_g": 22.8,
+      "azucares_g": 12.2,
+      "fibra_g": 2.6,
+      "sodio_mg": 1.0
+    }
+  },
+  {
+    "id": "arg_naranja",
+    "nombre": "Naranja para jugo / mesa",
+    "categoria": "frutas",
+    "keywords": ["naranja", "naranjas", "naranja ombligo", "naranja jugo"],
+    "exento_ley_27642": true,
+    "nova_group": 1,
+    "nutriscore_grade": "a",
+    "por_100g": {
+      "energia_kcal": 47.0,
+      "proteinas_g": 0.9,
+      "grasas_totales_g": 0.1,
+      "grasas_saturadas_g": 0.0,
+      "carbohidratos_g": 11.8,
+      "azucares_g": 9.4,
+      "fibra_g": 2.4,
+      "sodio_mg": 0.0
+    }
+  },
+  {
+    "id": "arg_mandarina",
+    "nombre": "Mandarina criolla / murcott",
+    "categoria": "frutas",
+    "keywords": ["mandarina", "mandarinas"],
+    "exento_ley_27642": true,
+    "nova_group": 1,
+    "nutriscore_grade": "a",
+    "por_100g": {
+      "energia_kcal": 53.0,
+      "proteinas_g": 0.8,
+      "grasas_totales_g": 0.3,
+      "grasas_saturadas_g": 0.0,
+      "carbohidratos_g": 13.3,
+      "azucares_g": 10.6,
+      "fibra_g": 1.8,
+      "sodio_mg": 2.0
+    }
+  },
+  {
+    "id": "arg_limon",
+    "nombre": "Limón fresco",
+    "categoria": "frutas",
+    "keywords": ["limon", "limones"],
+    "exento_ley_27642": true,
+    "nova_group": 1,
+    "nutriscore_grade": "a",
+    "por_100g": {
+      "energia_kcal": 29.0,
+      "proteinas_g": 1.1,
+      "grasas_totales_g": 0.3,
+      "grasas_saturadas_g": 0.0,
+      "carbohidratos_g": 9.3,
+      "azucares_g": 2.5,
+      "fibra_g": 2.8,
+      "sodio_mg": 2.0
+    }
+  },
+  {
+    "id": "arg_harina_trigo_000",
+    "nombre": "Harina de trigo 000 enriquecida Ley 25.630",
+    "categoria": "almacen",
+    "keywords": ["harina", "harina 000", "harina de trigo", "harina comun"],
+    "exento_ley_27642": true,
+    "nova_group": 1,
+    "nutriscore_grade": "a",
+    "por_100g": {
+      "energia_kcal": 345.0,
+      "proteinas_g": 10.5,
+      "grasas_totales_g": 1.2,
+      "grasas_saturadas_g": 0.3,
+      "carbohidratos_g": 72.5,
+      "azucares_g": 0.4,
+      "fibra_g": 3.2,
+      "sodio_mg": 5.0
+    }
+  },
+  {
+    "id": "arg_harina_trigo_0000",
+    "nombre": "Harina de trigo 0000 enriquecida Ley 25.630",
+    "categoria": "almacen",
+    "keywords": ["harina 0000", "harina cuatro ceros"],
+    "exento_ley_27642": true,
+    "nova_group": 1,
+    "nutriscore_grade": "a",
+    "por_100g": {
+      "energia_kcal": 350.0,
+      "proteinas_g": 9.8,
+      "grasas_totales_g": 1.0,
+      "grasas_saturadas_g": 0.2,
+      "carbohidratos_g": 74.0,
+      "azucares_g": 0.3,
+      "fibra_g": 2.5,
+      "sodio_mg": 4.0
+    }
+  },
+  {
+    "id": "arg_arroz_blanco",
+    "nombre": "Arroz blanco largo fino",
+    "categoria": "almacen",
+    "keywords": ["arroz", "arroz blanco", "arroz largo fino", "arroz no se pasa", "arroz parboil"],
+    "exento_ley_27642": true,
+    "nova_group": 1,
+    "nutriscore_grade": "a",
+    "por_100g": {
+      "energia_kcal": 358.0,
+      "proteinas_g": 7.1,
+      "grasas_totales_g": 0.7,
+      "grasas_saturadas_g": 0.2,
+      "carbohidratos_g": 79.5,
+      "azucares_g": 0.1,
+      "fibra_g": 1.3,
+      "sodio_mg": 2.0
+    }
+  },
+  {
+    "id": "arg_polenta_maiz",
+    "nombre": "Harina de maíz / Polenta rápida",
+    "categoria": "almacen",
+    "keywords": ["polenta", "harina de maiz", "polenta instantanea", "polenta magica"],
+    "exento_ley_27642": true,
+    "nova_group": 1,
+    "nutriscore_grade": "a",
+    "por_100g": {
+      "energia_kcal": 348.0,
+      "proteinas_g": 7.8,
+      "grasas_totales_g": 1.4,
+      "grasas_saturadas_g": 0.2,
+      "carbohidratos_g": 74.2,
+      "azucares_g": 0.6,
+      "fibra_g": 4.5,
+      "sodio_mg": 3.0
+    }
+  },
+  {
+    "id": "arg_fideos_secos",
+    "nombre": "Fideos secos de sémola / trigo",
+    "categoria": "almacen",
+    "keywords": ["fideos", "fideos secos", "tallarines", "tirabuzon", "mostachol", "spaghetti", "coditos"],
+    "exento_ley_27642": true,
+    "nova_group": 1,
+    "nutriscore_grade": "a",
+    "por_100g": {
+      "energia_kcal": 355.0,
+      "proteinas_g": 12.0,
+      "grasas_totales_g": 1.5,
+      "grasas_saturadas_g": 0.3,
+      "carbohidratos_g": 71.0,
+      "azucares_g": 2.0,
+      "fibra_g": 3.0,
+      "sodio_mg": 6.0
+    }
+  },
+  {
+    "id": "arg_lentejas_secas",
+    "nombre": "Lentejas secas",
+    "categoria": "almacen",
+    "keywords": ["lentejas", "lentejas secas", "lentejon"],
+    "exento_ley_27642": true,
+    "nova_group": 1,
+    "nutriscore_grade": "a",
+    "por_100g": {
+      "energia_kcal": 315.0,
+      "proteinas_g": 24.5,
+      "grasas_totales_g": 1.1,
+      "grasas_saturadas_g": 0.2,
+      "carbohidratos_g": 48.0,
+      "azucares_g": 2.0,
+      "fibra_g": 11.5,
+      "sodio_mg": 12.0
+    }
+  },
+  {
+    "id": "arg_aceite_girasol",
+    "nombre": "Aceite puro de girasol",
+    "categoria": "almacen",
+    "keywords": ["aceite", "aceite girasol", "aceite de girasol", "aceite puro girasol"],
+    "exento_ley_27642": true,
+    "nova_group": 2,
+    "nutriscore_grade": "c",
+    "por_100g": {
+      "energia_kcal": 884.0,
+      "proteinas_g": 0.0,
+      "grasas_totales_g": 100.0,
+      "grasas_saturadas_g": 11.0,
+      "carbohidratos_g": 0.0,
+      "azucares_g": 0.0,
+      "fibra_g": 0.0,
+      "sodio_mg": 0.0
+    }
+  },
+  {
+    "id": "arg_yerba_mate",
+    "nombre": "Yerba mate elaborada con palo",
+    "categoria": "almacen",
+    "keywords": ["yerba", "yerba mate", "yerba con palo", "yerba mate elaborada"],
+    "exento_ley_27642": true,
+    "nova_group": 1,
+    "nutriscore_grade": "a",
+    "por_100g": {
+      "energia_kcal": 45.0,
+      "proteinas_g": 1.5,
+      "grasas_totales_g": 0.3,
+      "grasas_saturadas_g": 0.1,
+      "carbohidratos_g": 9.0,
+      "azucares_g": 0.0,
+      "fibra_g": 1.8,
+      "sodio_mg": 8.0
+    }
+  },
+  {
+    "id": "arg_azucar_blanca",
+    "nombre": "Azúcar blanca común",
+    "categoria": "almacen",
+    "keywords": ["azucar", "azucar comun", "azucar blanca"],
+    "exento_ley_27642": true,
+    "nova_group": 2,
+    "nutriscore_grade": "d",
+    "por_100g": {
+      "energia_kcal": 395.0,
+      "proteinas_g": 0.0,
+      "grasas_totales_g": 0.0,
+      "grasas_saturadas_g": 0.0,
+      "carbohidratos_g": 99.8,
+      "azucares_g": 99.8,
+      "fibra_g": 0.0,
+      "sodio_mg": 1.0
+    }
+  },
+  {
+    "id": "arg_sal_fina",
+    "nombre": "Sal fina / gruesa enriquecida con yodo",
+    "categoria": "almacen",
+    "keywords": ["sal", "sal fina", "sal gruesa", "sal entrefina"],
+    "exento_ley_27642": true,
+    "nova_group": 2,
+    "nutriscore_grade": "c",
+    "por_100g": {
+      "energia_kcal": 0.0,
+      "proteinas_g": 0.0,
+      "grasas_totales_g": 0.0,
+      "grasas_saturadas_g": 0.0,
+      "carbohidratos_g": 0.0,
+      "azucares_g": 0.0,
+      "fibra_g": 0.0,
+      "sodio_mg": 38758.0
+    }
+  }
+]

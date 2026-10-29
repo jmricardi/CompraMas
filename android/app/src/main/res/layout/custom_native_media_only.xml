@@ -1,0 +1,148 @@
+<com.yandex.mobile.ads.nativeads.NativeAdView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/native_ad_view_media_only"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <!-- 1. Cabecera superior: TitleView + AdChoices -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="24dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingStart="0dp"
+            android:paddingEnd="0dp"
+            android:layout_marginBottom="6dp">
+
+            <!-- AdAttributionView con estilo píldora 'AD' visible requerida por normativas de Yandex -->
+            <TextView
+                android:id="@+id/native_media_ad_attribution"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:paddingTop="3dp"
+                android:paddingBottom="3dp"
+                android:gravity="center"
+                android:includeFontPadding="false"
+                android:background="@drawable/bg_ad_badge"
+                android:textColor="#BDBDC5"
+                android:textSize="9sp"
+                android:textStyle="bold"
+                android:visibility="visible"
+                android:text="AD" />
+
+            <!-- TitleView del anuncio nativo ocupando el ancho dinámico -->
+            <TextView
+                android:id="@+id/native_media_title_view"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="0dp"
+                android:layout_marginEnd="0dp"
+                android:includeFontPadding="false"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:textColor="#FFFFFF"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+
+        </LinearLayout>
+
+        <!-- 2. NativeMediaView contenido dentro de FrameLayout adaptativo -->
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:minHeight="160dp">
+
+            <com.yandex.mobile.ads.nativeads.MediaView
+                android:id="@+id/native_media_view"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center" />
+
+            <!-- Feedback / Menu Icon View (Obligatorio en Feed), sobre la imagen -->
+            <ImageView
+                android:id="@+id/native_media_feedback_view"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_gravity="top|end"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="8dp"
+                android:scaleType="centerInside"
+                android:contentDescription="Feedback menu"
+                android:visibility="visible" />
+
+            <!-- Domain/Sponsored View para Yandex Feed/Media Nativo, sobre la imagen -->
+            <TextView
+                android:id="@+id/native_media_domain_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom|start"
+                android:layout_marginBottom="12dp"
+                android:layout_marginStart="8dp"
+                android:paddingStart="6dp"
+                android:paddingEnd="6dp"
+                android:paddingTop="2dp"
+                android:paddingBottom="2dp"
+                android:background="#99000000"
+                android:includeFontPadding="false"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:textColor="#00E5FF"
+                android:textSize="11sp"
+                android:visibility="visible" />
+
+            <!-- Contenedor del CTA flotante para forzar alto 48dp y centrado vertical -->
+            <FrameLayout
+                android:layout_width="wrap_content"
+                android:layout_height="48dp"
+                android:layout_gravity="bottom|end"
+                android:layout_marginEnd="8dp"
+                android:layout_marginBottom="8dp">
+                <Button
+                    android:id="@+id/native_media_cta_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="32dp"
+                    android:layout_gravity="center"
+                    android:paddingStart="14dp"
+                    android:paddingEnd="14dp"
+                    android:paddingTop="0dp"
+                    android:paddingBottom="0dp"
+                    android:gravity="center"
+                    android:includeFontPadding="false"
+                    android:insetTop="0dp"
+                    android:insetBottom="0dp"
+                    android:minHeight="0dp"
+                    android:minWidth="0dp"
+                    android:backgroundTint="#00E5FF"
+                    android:textColor="#000000"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    android:elevation="4dp"
+                    android:textAllCaps="false" />
+            </FrameLayout>
+        </FrameLayout>
+
+        <!-- Warning / Disclaimer View -->
+        <TextView
+            android:id="@+id/native_warning_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:textColor="#BDBDC5"
+            android:textSize="9sp"
+            android:maxLines="2"
+            android:ellipsize="end"
+            android:visibility="visible" />
+
+    </LinearLayout>
+
+</com.yandex.mobile.ads.nativeads.NativeAdView>

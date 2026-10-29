@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "273274874479",
+    "project_id": "compramas-c1783",
+    "storage_bucket": "compramas-c1783.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:273274874479:android:8df1e411f155dc5de8bb9a",
+        "android_client_info": {
+          "package_name": "dev.arandulabs.compramas"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDR7q_eEvz0J1YEl4QiTF8DufWIsgUiM3o"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

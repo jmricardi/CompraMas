@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import '../components/clay/animated_clay_shopping_cart.dart';
+import '../components/clay/animated_png_cart.dart';
 import 'main_scaffold_screen.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -77,9 +77,10 @@ class _SplashScreenState extends State<SplashScreen> {
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // Carrito de compras animado con flotación senoidal, ruedas giratorias y salto
-                  const AnimatedClayShoppingCart(
+                  // Carrito de compras PNG animado con física de squash & stretch, flotación senoidal y sombra
+                  const AnimatedPngCart(
                     size: 116.0,
+                    imageAsset: 'assets/icons/icono_app.png',
                     autoJump: true,
                   ),
                   const SizedBox(height: 20),

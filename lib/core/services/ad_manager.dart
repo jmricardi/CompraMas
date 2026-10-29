@@ -5,14 +5,16 @@ import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import '../../models/house_ad_model.dart';
+import '../cache/hive_manager.dart';
 
 part 'ad_manager_banner.dart';
 part 'ad_manager_events.dart';
 part 'ad_manager_house_ads.dart';
 part 'ad_manager_native.dart';
+part 'ad_manager_interstitial.dart';
 
-/// Orquestador central de publicidad para CompraMas (Híbrido Yandex + Meta + In-House).
-/// No incluye anuncios intersticiales según los requerimientos del producto.
+/// Orquestador central de publicidad para CompraMas (Híbrido Meta Audience Network + Yandex Mobile Ads + In-House).
+/// Incluye mediación en cascada (waterfall), límites estrictos antifraude y temporizadores de enfriamiento independientes.
 class AdManager {
   factory AdManager() => instance;
   AdManager._internal();
@@ -28,6 +30,11 @@ class AdManager {
   StreamSubscription? _nativeEventSubscription;
   StreamSubscription? _bannerEventSubscription;
 
+  // Placements oficiales independientes
+  static const String placementInterstitial = 'interstitial';
+  static const String placementFeedCompact = 'native_feed_compact';
+  static const String placementArticleDetail = 'native_article_detail';
+
   // Configuración dinámica desde Firebase Remote Config
   bool _showAds = false;
   bool _showNativeAds = true;
@@ -42,12 +49,29 @@ class AdManager {
   int _activeBannerClients = 0;
   bool isExternalBannerActive = false;
 
+  // Cooldowns independientes por placement (Solo se activan en impresión real)
+  final Map<String, DateTime> _lastAdShownTime = {};
+  final Map<String, DateTime> _lastMetaNoFillTime = {};
+  final Map<String, int> _cooldownDurations = {
+    placementInterstitial: 120, // Mínimo 120s para intersticiales
+    placementFeedCompact: 60,   // Mínimo 60s para feed
+    placementArticleDetail: 60, // Mínimo 60s para detalle
+  };
+
+  int _interstitialDailyCount = 0;
+  int _actionCounter = 0;
+  bool _forceTestMode = false;
+
   // Notificadores reactivos
   final ValueNotifier<int> nativeAdLoadedNotifier = ValueNotifier<int>(0);
   final ValueNotifier<bool> externalBannerVisibleNotifier = ValueNotifier<bool>(false);
   final ValueNotifier<double> bannerHeightNotifier = ValueNotifier<double>(50.0);
   final ValueNotifier<bool> debugMetaEnabledNotifier = ValueNotifier<bool>(true);
   final ValueNotifier<bool> debugYandexEnabledNotifier = ValueNotifier<bool>(true);
+  final ValueNotifier<bool> forceTestModeNotifier = ValueNotifier<bool>(false);
+  final ValueNotifier<int> interstitialCountNotifier = ValueNotifier<int>(0);
+  final ValueNotifier<int> actionCounterNotifier = ValueNotifier<int>(0);
+  final ValueNotifier<int> cooldownTickNotifier = ValueNotifier<int>(0);
 
   // Getters públicos
   bool get showAds => _showAds;
@@ -55,6 +79,11 @@ class AdManager {
   bool get showBannerAds => _showAds && _showBannerAds;
   bool get isMetaEnabled => debugMetaEnabledNotifier.value;
   bool get isYandexEnabled => debugYandexEnabledNotifier.value;
+  bool get forceTestMode => forceTestModeNotifier.value;
+  int get dailyInterstitialsCount => _interstitialDailyCount;
+  int get maxDailyInterstitials => 6;
+  int get actionsUntilNextInterstitial => 5 - (_actionCounter % 5);
+  int get actionCounter => _actionCounter;
   double get houseBannerRatio => _houseBannerRatio;
   double get houseNativeRatio => _houseNativeRatio;
   int get bannerPersistencia => _bannerPersistencia;
@@ -62,14 +91,56 @@ class AdManager {
   List<HouseAd> get houseBannerAds => List.unmodifiable(_houseBannerAds);
   List<HouseAd> get houseNativeAds => List.unmodifiable(_houseNativeAds);
 
+  static String _todayDateKey() {
+    final now = DateTime.now();
+    return '${now.year}_${now.month}_${now.day}';
+  }
+
   /// Inicializa los SDKs nativos y descarga la configuración de Remote Config
   Future<void> initialize() async {
     try {
       _setupGlobalAdEventListeners();
 
+      // Cargar configuraciones persistidas desde Hive
+      final dateKey = _todayDateKey();
+      _interstitialDailyCount = HiveManager.getSync<int>('ads_interstitial_daily_count_$dateKey') ?? 0;
+      interstitialCountNotifier.value = _interstitialDailyCount;
+
+      _actionCounter = HiveManager.getSync<int>('ads_action_counter_$dateKey') ?? 0;
+      actionCounterNotifier.value = _actionCounter;
+
+      _forceTestMode = HiveManager.getSync<bool>('force_test_mode') ?? false;
+      forceTestModeNotifier.value = _forceTestMode;
+
+      final savedMeta = HiveManager.getSync<bool>('debug_meta_ads_enabled');
+      if (savedMeta != null) debugMetaEnabledNotifier.value = savedMeta;
+
+      final savedYandex = HiveManager.getSync<bool>('debug_yandex_ads_enabled');
+      if (savedYandex != null) debugYandexEnabledNotifier.value = savedYandex;
+
+      // Restaurar timestamps de último anuncio mostrado
+      for (final p in [placementInterstitial, placementFeedCompact, placementArticleDetail]) {
+        final ts = HiveManager.getSync<int>('ads_last_shown_${p}_$dateKey');
+        if (ts != null && ts > 0) {
+          _lastAdShownTime[p] = DateTime.fromMillisecondsSinceEpoch(ts);
+        }
+      }
+
       // 1. Inicializar SDKs nativos de anuncios en Kotlin
       final ok = await _channel.invokeMethod<bool>('initAds') ?? false;
       debugPrint('[AdManager] Inicialización nativa completada (ok=$ok).');
+
+      if (_forceTestMode) {
+        await _channel.invokeMethod('setForcedTestMode', {'enabled': true});
+      }
+
+      // Sincronizar flags de red con nativo
+      if (savedMeta != null) {
+        await _channel.invokeMethod('toggleNetwork', {'network': 'meta', 'enabled': savedMeta});
+      }
+      if (savedYandex != null) {
+        await _channel.invokeMethod('toggleNetwork', {'network': 'yandex', 'enabled': savedYandex});
+      }
 
       // 2. Sincronizar Firebase Remote Config
       await _syncRemoteConfig();
@@ -206,11 +277,105 @@ class AdManager {
       });
       if (network.toLowerCase() == 'meta') {
         debugMetaEnabledNotifier.value = enabled;
+        HiveManager.setSync<bool>('debug_meta_ads_enabled', enabled);
       } else if (network.toLowerCase() == 'yandex') {
         debugYandexEnabledNotifier.value = enabled;
+        HiveManager.setSync<bool>('debug_yandex_ads_enabled', enabled);
       }
     } catch (e) {
       debugPrint('[AdManager] Error al conmutar red $network: $e');
+    }
+  }
+
+  /// Consulta el tiempo restante de enfriamiento en segundos para un placement.
+  /// Retorna 0 si ya está listo para mostrarse.
+  int getRemainingCooldown(String placement) {
+    final lastTime = _lastAdShownTime[placement];
+    if (lastTime == null) return 0;
+
+    final duration = _cooldownDurations[placement] ?? 60;
+    final elapsedSeconds = DateTime.now().difference(lastTime).inSeconds;
+    final remaining = duration - elapsedSeconds;
+    return remaining > 0 ? remaining : 0;
+  }
+
+  /// Verifica si el placement ha superado su periodo de enfriamiento.
+  bool isPlacementReady(String placement) {
+    return getRemainingCooldown(placement) == 0;
+  }
+
+  /// Registra la impresión real de un anuncio (onAdShown / onAdImpression).
+  /// El cooldown SOLO se activa aquí, nunca al solicitar o cargar.
+  void recordAdImpression(String placement) {
+    final now = DateTime.now();
+    _lastAdShownTime[placement] = now;
+    final dateKey = _todayDateKey();
+    HiveManager.setSync<int>('ads_last_shown_${placement}_$dateKey', now.millisecondsSinceEpoch);
+
+    if (placement == placementInterstitial) {
+      _interstitialDailyCount++;
+      interstitialCountNotifier.value = _interstitialDailyCount;
+      HiveManager.setSync<int>('ads_interstitial_daily_count_$dateKey', _interstitialDailyCount);
+    }
+
+    cooldownTickNotifier.value++;
+    debugPrint('[AdManager] ⏱️ Cooldown iniciado para [$placement] tras impresión real.');
+  }
+
+  /// Registra un fallo de Meta No-Fill (código 1001) para aplicar backoff de 45s.
+  void recordMetaNoFill(String placement) {
+    _lastMetaNoFillTime[placement] = DateTime.now();
+    debugPrint('[AdManager] 🚫 Meta No-Fill (1001) en [$placement]. Backoff de 45s aplicado.');
+  }
+
+  /// Verifica si Meta se encuentra en periodo de backoff por no-fill previo.
+  bool isMetaOnNoFillBackoff(String placement) {
+    final last = _lastMetaNoFillTime[placement];
+    if (last == null) return false;
+    return DateTime.now().difference(last).inSeconds < 45;
+  }
+
+  /// Reinicia todos los cooldowns, límites diarios y contadores de acción a cero.
+  void resetCooldownsAndCounters() {
+    _lastAdShownTime.clear();
+    _lastMetaNoFillTime.clear();
+    _interstitialDailyCount = 0;
+    _actionCounter = 0;
+    interstitialCountNotifier.value = 0;
+    actionCounterNotifier.value = 0;
+    cooldownTickNotifier.value++;
+
+    final dateKey = _todayDateKey();
+    HiveManager.setSync<int>('ads_interstitial_daily_count_$dateKey', 0);
+    HiveManager.setSync<int>('ads_action_counter_$dateKey', 0);
+
+    for (final p in [placementInterstitial, placementFeedCompact, placementArticleDetail]) {
+      HiveManager.deleteSync('ads_last_shown_${p}_$dateKey');
+    }
+    debugPrint('[AdManager] 🔄 Cooldowns y contadores reiniciados exitosamente.');
+  }
+
+  /// Consulta la información de dispositivo y estado de SDKs desde el canal nativo.
+  Future<Map<String, dynamic>> getDeviceInfo() async {
+    try {
+      final res = await _channel.invokeMapMethod<String, dynamic>('getDeviceInfo');
+      return res ?? {};
+    } catch (e) {
+      debugPrint('[AdManager] Error consultando getDeviceInfo: $e');
+      return {};
+    }
+  }
+
+  /// Fuerza el modo de prueba (Test Mode) en Meta y Yandex independientemente de Release/Debug.
+  Future<void> setForcedTestMode(bool enabled) async {
+    _forceTestMode = enabled;
+    forceTestModeNotifier.value = enabled;
+    HiveManager.setSync<bool>('force_test_mode', enabled);
+    try {
+      await _channel.invokeMethod('setForcedTestMode', {'enabled': enabled});
+      debugPrint('[AdManager] Modo prueba forzado actualizado: $enabled');
+    } catch (e) {
+      debugPrint('[AdManager] Error configurando setForcedTestMode: $e');
     }
   }
 }

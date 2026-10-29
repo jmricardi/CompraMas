@@ -45,16 +45,58 @@ internal fun MainActivity.configureCompraMasFlutterEngine(flutterEngine: Flutter
             when (call.method) {
                 "initAds", "initYandex" -> {
                     try {
-                        YandexAds.initialize(this) {
-                            Log.i("CompraMasAds", "Yandex Mobile Ads inicializado exitosamente")
+                        MainActivity.setupTestDeviceAndSdkSettings(this) {
+                            YandexAds.initialize(this) {
+                                MainActivity.isYandexInitialized = true
+                                Log.i("CompraMasAds", "Yandex Mobile Ads inicializado exitosamente")
+                            }
+                            AudienceNetworkAds.initialize(this)
+                            MainActivity.isMetaInitialized = true
+                            Log.i("CompraMasAds", "Meta Audience Network inicializado exitosamente")
                         }
-                        AudienceNetworkAds.initialize(this)
-                        Log.i("CompraMasAds", "Meta Audience Network inicializado exitosamente")
                         result.success(true)
                     } catch (e: Exception) {
                         Log.e("CompraMasAds", "Error inicializando SDKs de anuncios: $e")
                         result.success(false)
                     }
+                }
+
+                "getDeviceInfo" -> {
+                    val aaid = MainActivity.detectedAaid ?: MainActivity.TEST_AAID
+                    val isTarget = aaid.equals(MainActivity.TEST_AAID, ignoreCase = true)
+                    val isTest = isTarget || BuildConfig.DEBUG || MainActivity.isForcedTestMode
+                    val info = mapOf(
+                        "aaid" to aaid,
+                        "metaDeviceHash" to MainActivity.META_DEVICE_HASH,
+                        "aaidMd5" to MainActivity.AAID_MD5,
+                        "aaidSha1" to MainActivity.AAID_SHA1,
+                        "isTestDevice" to isTest,
+                        "isMetaInitialized" to MainActivity.isMetaInitialized,
+                        "isYandexInitialized" to MainActivity.isYandexInitialized,
+                        "isForcedTestMode" to MainActivity.isForcedTestMode
+                    )
+                    result.success(info)
+                }
+
+                "setForcedTestMode" -> {
+                    val forced = call.argument<Boolean>("enabled") ?: false
+                    MainActivity.isForcedTestMode = forced
+                    MainActivity.setupTestDeviceAndSdkSettings(this)
+                    result.success(true)
+                }
+
+                "loadInterstitial" -> {
+                    loadInterstitial()
+                    result.success(true)
+                }
+
+                "showInterstitial" -> {
+                    val shown = showInterstitial()
+                    result.success(shown)
+                }
+
+                "isInterstitialReady" -> {
+                    result.success(isInterstitialReady())
                 }
 
                 "showBottomBanner" -> {

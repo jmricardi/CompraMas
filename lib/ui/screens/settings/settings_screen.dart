@@ -4,10 +4,12 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../core/cache/hive_manager.dart';
 import '../../../services/locale_service.dart';
 import '../../../services/settings_service.dart';
 import '../../components/app_header_top_bar.dart';
 import '../../components/glass_card.dart';
+import 'developer_ad_settings_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -18,6 +20,37 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   final int _adsWatched = 3;
+  int _devTapCount = 0;
+  bool _isDevUnlocked = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _isDevUnlocked = HiveManager.getSync<bool>('is_dev_mode_unlocked') ?? false;
+  }
+
+  void _handleVersionTap() {
+    _devTapCount++;
+    if (_devTapCount >= 5 || _isDevUnlocked) {
+      _isDevUnlocked = true;
+      HiveManager.setSync<bool>('is_dev_mode_unlocked', true);
+      _devTapCount = 0;
+      if (!mounted) return;
+      setState(() {});
+      Navigator.of(context).push(
+        MaterialPageRoute(builder: (_) => const DeveloperAdSettingsScreen()),
+      );
+    } else {
+      final remaining = 5 - _devTapCount;
+      ScaffoldMessenger.of(context).clearSnackBars();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Toca $remaining veces más para acceder al Panel de Anuncios.'),
+          duration: const Duration(seconds: 1),
+        ),
+      );
+    }
+  }
 
   Future<void> _handleWatchAd() async {
     if (!mounted) return;
@@ -113,6 +146,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           const SizedBox(height: 10),
 
+          // Panel de anuncios para desarrolladores (si está desbloqueado)
+          if (_isDevUnlocked) ...[
+            _ActionCard(
+              icon: Icons.developer_mode_rounded,
+              title: 'Panel de Anuncios (Desarrollador)',
+              subtitle: 'Meta, Yandex, Test Mode y Cooldowns',
+              trailing: const Icon(Icons.chevron_right_rounded),
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const DeveloperAdSettingsScreen()),
+                );
+              },
+            ),
+            const SizedBox(height: 10),
+          ],
+
           // 3. Contenedor "Ayuda" (luego de anuncios vistos hoy)
           _buildAyudaContainer(context),
           const SizedBox(height: 10),
@@ -123,7 +172,26 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
           // 5. Botón "Salir de la aplicación"
           _buildExitButton(context),
-          const SizedBox(height: 24),
+          const SizedBox(height: 16),
+
+          // 6. Pie de versión de la app (toca 5 veces para activar modo dev)
+          InkWell(
+            onTap: _handleVersionTap,
+            borderRadius: BorderRadius.circular(8),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: Center(
+                child: Text(
+                  'CompraMas v1.0.0 (build 1)',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
         ],
       ),
     );

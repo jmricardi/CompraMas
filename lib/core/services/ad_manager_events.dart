@@ -9,21 +9,36 @@ extension AdManagerEvents on AdManager {
           (dynamic event) {
             if (event is Map) {
               final eventType = event['event'] as String? ?? 'unknown';
+              final network = event['network'] as String? ?? '';
+              final placement = _resolvePlacement(event);
+
               switch (eventType) {
                 case 'loaded':
                   nativeAdLoadedNotifier.value++;
-                  debugPrint('[AdManager] ✅ Anuncio nativo cargado exitosamente.');
+                  debugPrint('[AdManager] ✅ Anuncio [$placement] cargado ($network).');
                   break;
+
                 case 'shown':
-                  debugPrint('[AdManager] 👀 Anuncio nativo impreso.');
+                  // Regla estricta antifraude: El cooldown SOLO se activa en impresión real
+                  recordAdImpression(placement);
+                  debugPrint('[AdManager] 👀 Anuncio [$placement] impreso en pantalla ($network). Cooldown iniciado.');
                   break;
+
                 case 'clicked':
-                  debugPrint('[AdManager] 🖱️ Clic en anuncio nativo.');
+                  debugPrint('[AdManager] 🖱️ Clic registrado en [$placement] ($network).');
                   break;
+
                 case 'load_failed':
                   final err = event['error'] ?? '';
-                  final code = event['code'] ?? '';
-                  debugPrint('[AdManager] ⚠️ Error en anuncio nativo: [$code] $err');
+                  final code = event['code'];
+                  if (network.contains('Meta') && (code == 1001 || code == 1002)) {
+                    recordMetaNoFill(placement);
+                  }
+                  debugPrint('[AdManager] ⚠️ Fallo al cargar [$placement] ($network) [$code]: $err');
+                  break;
+
+                case 'dismissed':
+                  debugPrint('[AdManager] 🚪 Anuncio [$placement] cerrado ($network).');
                   break;
               }
             }
@@ -41,6 +56,7 @@ extension AdManagerEvents on AdManager {
           (dynamic event) {
             if (event is Map) {
               final eventType = event['event'] as String? ?? 'unknown';
+              final network = event['network'] as String? ?? '';
               switch (eventType) {
                 case 'loaded':
                   externalBannerVisibleNotifier.value = true;
@@ -48,10 +64,17 @@ extension AdManagerEvents on AdManager {
                   if (h is num && h > 0) {
                     bannerHeightNotifier.value = h.toDouble();
                   }
-                  debugPrint('[AdManager] ✅ Bottom Banner cargado exitosamente.');
+                  debugPrint('[AdManager] ✅ Bottom Banner cargado exitosamente ($network).');
+                  break;
+                case 'shown':
+                  debugPrint('[AdManager] 👀 Bottom Banner mostrado en pantalla ($network).');
                   break;
                 case 'load_failed':
                   externalBannerVisibleNotifier.value = false;
+                  final code = event['code'];
+                  if (network.contains('Meta') && (code == 1001 || code == 1002)) {
+                    recordMetaNoFill('banner');
+                  }
                   break;
               }
             }
@@ -61,6 +84,20 @@ extension AdManagerEvents on AdManager {
           },
           cancelOnError: false,
         );
+  }
+
+  String _resolvePlacement(Map event) {
+    final directPlacement = event['placement'] as String?;
+    if (directPlacement != null && directPlacement.isNotEmpty) {
+      return directPlacement;
+    }
+    final section = (event['section'] ?? event['format']) as String?;
+    if (section == 'Feed') {
+      return AdManager.placementFeedCompact;
+    } else if (section == 'Compact') {
+      return AdManager.placementArticleDetail;
+    }
+    return AdManager.placementFeedCompact;
   }
 
   void _safeCancelSubscription(StreamSubscription? sub) {

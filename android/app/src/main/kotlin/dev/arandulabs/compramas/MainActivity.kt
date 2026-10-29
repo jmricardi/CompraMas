@@ -1,16 +1,22 @@
 package dev.arandulabs.compramas
 
+import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import android.widget.FrameLayout
 import androidx.activity.enableEdgeToEdge
 import com.facebook.ads.Ad
+import com.facebook.ads.AdSettings
 import com.facebook.ads.AdView
+import com.google.android.gms.ads.identifier.AdvertisingIdClient
 import com.yandex.mobile.ads.banner.BannerAdView
+import com.yandex.mobile.ads.common.MobileAds
 import com.yandex.mobile.ads.nativeads.NativeAd
 import io.flutter.embedding.android.FlutterFragmentActivity
 import io.flutter.embedding.android.RenderMode
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.EventChannel
+import java.util.concurrent.Executors
 
 class MainActivity : FlutterFragmentActivity() {
 
@@ -25,12 +31,13 @@ class MainActivity : FlutterFragmentActivity() {
     internal var nativeEventSink: EventChannel.EventSink? = null
     internal var bannerEventSink: EventChannel.EventSink? = null
 
-    // Yandex Ad Units
-    internal val BANNER_AD_UNIT_ID = "R-M-19733667-2"
-    internal val BANNER_ANALISIS_INLINE_AD_UNIT_ID = "R-M-19733667-2"
-    internal val NATIVE_ANALISIS_AD_UNIT_ID = "R-M-19733667-3"
-    internal val NATIVE_FEED_AD_UNIT_ID = "R-M-19733667-7"
-    internal val NATIVE_FEED_FALLBACK_AD_UNIT_ID = "R-M-19733667-5"
+    // Yandex Ad Units (App ID: 20298152)
+    internal val BANNER_AD_UNIT_ID = "R-M-20298152-1"
+    internal val BANNER_ANALISIS_INLINE_AD_UNIT_ID = "R-M-20298152-1"
+    internal val NATIVE_ANALISIS_AD_UNIT_ID = "R-M-20298152-2"
+    internal val NATIVE_FEED_AD_UNIT_ID = "R-M-20298152-2"
+    internal val NATIVE_FEED_FALLBACK_AD_UNIT_ID = "R-M-20298152-2"
+    internal val INTERSTITIAL_AD_UNIT_ID = "R-M-20298152-1"
 
     internal var bannerAdView: BannerAdView? = null
     internal var metaBannerAdView: AdView? = null
@@ -39,6 +46,22 @@ class MainActivity : FlutterFragmentActivity() {
 
     companion object {
         internal var instance: java.lang.ref.WeakReference<MainActivity>? = null
+
+        // Identificadores de dispositivo de prueba
+        const val TEST_AAID = "36142cbb-659e-49f9-a60a-10ca1ad1abe1"
+        const val META_DEVICE_HASH = "c92a4e70-6c57-47fe-a817-0b649cf75f5e"
+        const val AAID_MD5 = "881a434a51174f08b1f40b7e16bd9609"
+        const val AAID_SHA1 = "d9b3a9c840205406c34e565c82ad083729d5d353"
+        val META_AUX_HASHES = listOf(
+            "80598c82-d16e-4632-b468-0f70f93b07c2",
+            "3a986d9b-1ea0-483c-80fb-bdda78548623",
+            "fcf912a8-4960-4e58-9efb-970ca8e072e1"
+        )
+
+        var detectedAaid: String? = null
+        var isForcedTestMode: Boolean = false
+        var isMetaInitialized: Boolean = false
+        var isYandexInitialized: Boolean = false
 
         internal val cachedAnalysisNativeAds = mutableListOf<NativeAd>()
         internal val cachedAnalysisNativeAdTimes = mutableListOf<Long>()
@@ -63,7 +86,48 @@ class MainActivity : FlutterFragmentActivity() {
         var lastMetaNativeAnalysisRequestTime: Long = 0
         var lastMetaNativeFeedRequestTime: Long = 0
         var lastMetaBottomBannerRequestTime: Long = 0
+        var lastMetaInterstitialRequestTime: Long = 0
         val META_COOLDOWN_MS = 45000L
+
+        fun setupTestDeviceAndSdkSettings(context: Context, onComplete: (() -> Unit)? = null) {
+            Executors.newSingleThreadExecutor().execute {
+                try {
+                    val adInfo = AdvertisingIdClient.getAdvertisingIdInfo(context.applicationContext)
+                    detectedAaid = adInfo.id
+                    Log.i("CompraMasAds", "📱 AAID obtenido: $detectedAaid")
+                } catch (e: Exception) {
+                    Log.w("CompraMasAds", "⚠️ No se pudo consultar AAID: ${e.message}")
+                }
+
+                val aaid = detectedAaid
+                val isTargetTestDevice = (aaid != null && aaid.equals(TEST_AAID, ignoreCase = true))
+                val isTestMode = isTargetTestDevice || BuildConfig.DEBUG || isForcedTestMode
+
+                if (isTestMode) {
+                    try {
+                        AdSettings.setTestMode(true)
+                        AdSettings.addTestDevice(META_DEVICE_HASH)
+                        META_AUX_HASHES.forEach { hash ->
+                            AdSettings.addTestDevice(hash)
+                        }
+                        AdSettings.turnOnSDKDebugger(context.applicationContext)
+                        Log.i("CompraMasAds", "🛡️ Meta Test Mode y Debugger activados.")
+                    } catch (e: Exception) {
+                        Log.e("CompraMasAds", "Error configurando AdSettings de Meta: $e")
+                    }
+
+                    try {
+                        MobileAds.enableLogging(true)
+                        MobileAds.enableDebugErrorIndicator(true)
+                        Log.i("CompraMasAds", "🛡️ Yandex Logging y Debug Indicator activados.")
+                    } catch (e: Exception) {
+                        Log.e("CompraMasAds", "Error configurando MobileAds de Yandex: $e")
+                    }
+                }
+
+                onComplete?.invoke()
+            }
+        }
 
         fun sendNativeEvent(data: Map<String, Any?>) {
             instance?.get()?.let { activity ->
@@ -132,6 +196,7 @@ class MainActivity : FlutterFragmentActivity() {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         instance = java.lang.ref.WeakReference(this)
+        setupTestDeviceAndSdkSettings(this)
     }
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {

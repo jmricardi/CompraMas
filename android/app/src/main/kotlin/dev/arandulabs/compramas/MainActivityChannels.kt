@@ -64,7 +64,8 @@ internal fun MainActivity.configureCompraMasFlutterEngine(flutterEngine: Flutter
                 "getDeviceInfo" -> {
                     val aaid = MainActivity.detectedAaid ?: MainActivity.TEST_AAID
                     val isTarget = aaid.equals(MainActivity.TEST_AAID, ignoreCase = true)
-                    val isTest = isTarget || BuildConfig.DEBUG || MainActivity.isForcedTestMode
+                    val isDebug = (applicationInfo.flags and android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) != 0
+                    val isTest = isTarget || isDebug || MainActivity.isForcedTestMode
                     val info = mapOf(
                         "aaid" to aaid,
                         "metaDeviceHash" to MainActivity.META_DEVICE_HASH,

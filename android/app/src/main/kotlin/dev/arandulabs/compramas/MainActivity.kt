@@ -10,7 +10,7 @@ import com.facebook.ads.AdSettings
 import com.facebook.ads.AdView
 import com.google.android.gms.ads.identifier.AdvertisingIdClient
 import com.yandex.mobile.ads.banner.BannerAdView
-import com.yandex.mobile.ads.common.MobileAds
+import com.yandex.mobile.ads.common.YandexAds
 import com.yandex.mobile.ads.nativeads.NativeAd
 import io.flutter.embedding.android.FlutterFragmentActivity
 import io.flutter.embedding.android.RenderMode
@@ -101,7 +101,8 @@ class MainActivity : FlutterFragmentActivity() {
 
                 val aaid = detectedAaid
                 val isTargetTestDevice = (aaid != null && aaid.equals(TEST_AAID, ignoreCase = true))
-                val isTestMode = isTargetTestDevice || BuildConfig.DEBUG || isForcedTestMode
+                val isDebug = (context.applicationInfo.flags and android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) != 0
+                val isTestMode = isTargetTestDevice || isDebug || isForcedTestMode
 
                 if (isTestMode) {
                     try {
@@ -117,11 +118,11 @@ class MainActivity : FlutterFragmentActivity() {
                     }
 
                     try {
-                        MobileAds.enableLogging(true)
-                        MobileAds.enableDebugErrorIndicator(true)
+                        YandexAds.enableLogging(true)
+                        YandexAds.enableDebugErrorIndicator(true)
                         Log.i("CompraMasAds", "🛡️ Yandex Logging y Debug Indicator activados.")
                     } catch (e: Exception) {
-                        Log.e("CompraMasAds", "Error configurando MobileAds de Yandex: $e")
+                        Log.e("CompraMasAds", "Error configurando YandexAds: $e")
                     }
                 }
 

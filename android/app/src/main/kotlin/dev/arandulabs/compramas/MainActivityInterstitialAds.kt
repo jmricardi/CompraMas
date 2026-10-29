@@ -6,7 +6,7 @@ import com.facebook.ads.AdError as MetaAdError
 import com.facebook.ads.InterstitialAd as MetaInterstitialAd
 import com.facebook.ads.InterstitialAdListener
 import com.yandex.mobile.ads.common.AdError
-import com.yandex.mobile.ads.common.AdRequestConfiguration
+import com.yandex.mobile.ads.common.AdRequest
 import com.yandex.mobile.ads.common.AdRequestError
 import com.yandex.mobile.ads.common.ImpressionData
 import com.yandex.mobile.ads.interstitial.InterstitialAd as YandexInterstitialAd
@@ -143,7 +143,8 @@ internal fun MainActivity.loadInterstitial(isFallbackToYandex: Boolean = false) 
 
     try {
         val loader = InterstitialAdLoader(this)
-        loader.setAdLoadListener(object : InterstitialAdLoadListener {
+        val adRequest = AdRequest.Builder(INTERSTITIAL_AD_UNIT_ID).build()
+        loader.loadAd(adRequest, object : InterstitialAdLoadListener {
             override fun onAdLoaded(interstitialAd: YandexInterstitialAd) {
                 Log.i("YandexAds", "🎯 Yandex Interstitial cargado exitosamente")
                 isInterstitialLoading = false
@@ -168,9 +169,6 @@ internal fun MainActivity.loadInterstitial(isFallbackToYandex: Boolean = false) 
                 ))
             }
         })
-
-        val config = AdRequestConfiguration.Builder(INTERSTITIAL_AD_UNIT_ID).build()
-        loader.loadAd(config)
     } catch (e: Exception) {
         Log.e("YandexAds", "Error iniciando carga Yandex Interstitial: $e")
         isInterstitialLoading = false
@@ -232,7 +230,7 @@ internal fun MainActivity.showInterstitial(): Boolean {
                     ))
                 }
 
-                override fun onImpression(impressionData: ImpressionData?) {
+                override fun onAdImpression(impressionData: ImpressionData?) {
                     Log.i("YandexAds", "👁️ Yandex Interstitial registró impresión real")
                     MainActivity.sendNativeEvent(mapOf(
                         "event" to "shown",

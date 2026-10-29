@@ -22,6 +22,15 @@ class AppHeaderTopBar extends StatelessWidget implements PreferredSizeWidget {
     final screenWidth = MediaQuery.sizeOf(context).width;
     final horizontalPad = (screenWidth * 0.035).clamp(10.0, 20.0);
 
+    Widget? effectiveLeading = leading;
+    if (effectiveLeading == null && Navigator.canPop(context)) {
+      effectiveLeading = IconButton(
+        icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 20),
+        tooltip: 'Volver',
+        onPressed: () => Navigator.of(context).maybePop(),
+      );
+    }
+
     return SizedBox(
       height: preferredSize.height,
       width: screenWidth,
@@ -49,8 +58,8 @@ class AppHeaderTopBar extends StatelessWidget implements PreferredSizeWidget {
               padding: EdgeInsets.symmetric(horizontal: horizontalPad),
               child: Row(
                 children: [
-                  if (leading != null) ...[
-                    leading!,
+                  if (effectiveLeading != null) ...[
+                    effectiveLeading,
                     const SizedBox(width: 4),
                   ],
                   const _FontScaleControls(),

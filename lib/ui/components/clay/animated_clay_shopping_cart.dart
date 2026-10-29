@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -7,11 +8,13 @@ import 'package:flutter/services.dart';
 class AnimatedClayShoppingCart extends StatefulWidget {
   final double size;
   final VoidCallback? onTap;
+  final bool autoJump;
 
   const AnimatedClayShoppingCart({
     super.key,
     this.size = 64.0,
     this.onTap,
+    this.autoJump = false,
   });
 
   @override
@@ -23,6 +26,7 @@ class _AnimatedClayShoppingCartState extends State<AnimatedClayShoppingCart>
     with TickerProviderStateMixin {
   late final AnimationController _idleController;
   late final AnimationController _bounceController;
+  Timer? _autoJumpTimer;
 
   @override
   void initState() {
@@ -34,15 +38,25 @@ class _AnimatedClayShoppingCartState extends State<AnimatedClayShoppingCart>
       duration: const Duration(milliseconds: 2400),
     )..repeat();
 
-    // 2. Rebote elástico e inmersivo al interactuar (fluid spring jump)
+    // 2. Rebote elástico e inmersivo (fluid spring jump)
     _bounceController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 650),
     );
+
+    if (widget.autoJump) {
+      _autoJumpTimer = Timer.periodic(const Duration(milliseconds: 3200), (_) {
+        if (!mounted) return;
+        if (!_bounceController.isAnimating) {
+          _bounceController.forward(from: 0.0);
+        }
+      });
+    }
   }
 
   @override
   void dispose() {
+    _autoJumpTimer?.cancel();
     _idleController.dispose();
     _bounceController.dispose();
     super.dispose();

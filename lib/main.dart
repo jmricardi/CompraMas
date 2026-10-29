@@ -7,7 +7,6 @@ import 'package:provider/provider.dart';
 import 'config/app_config.dart';
 import 'config/theme.dart';
 import 'core/cache/hive_manager.dart';
-import 'core/services/ad_manager.dart';
 import 'services/locale_service.dart';
 import 'services/settings_service.dart';
 import 'viewmodels/scanner_viewmodel.dart';
@@ -58,11 +57,8 @@ Future<void> _initBackgroundServices() async {
       return true;
     };
     debugPrint('[CompraMas] Firebase Crashlytics configurado.');
-
-    await AdManager.instance.initialize().timeout(const Duration(seconds: 5));
-    debugPrint('[CompraMas] AdManager inicializado.');
   } catch (e) {
-    debugPrint('[CompraMas] Servicios secundarios (Ads/Firebase) omitidos: $e');
+    debugPrint('[CompraMas] Firebase omitido: $e');
   }
 }
 

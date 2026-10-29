@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import '../../../viewmodels/scanner_viewmodel.dart';
 import '../../../services/locale_service.dart';
 import '../../../services/settings_service.dart';
-import '../../components/app_header_top_bar.dart';
+import '../../components/ads/compramas_banner_ad.dart';
 import 'scanner_view.dart';
 import 'components/scan_states_views.dart';
 import 'components/scan_success_view.dart';
@@ -14,7 +14,12 @@ import 'components/cluster_confirmation_dialog.dart';
 import '../../../utils/product_variety_helper.dart';
 
 class ScanScreen extends StatefulWidget {
-  const ScanScreen({super.key});
+  final bool autoFocus;
+
+  const ScanScreen({
+    super.key,
+    this.autoFocus = false,
+  });
 
   @override
   State<ScanScreen> createState() => _ScanScreenState();
@@ -26,6 +31,18 @@ class _ScanScreenState extends State<ScanScreen> {
   Timer? _debounceTimer;
   List<Map<String, dynamic>> _suggestions = [];
   bool _isSearchingSuggestions = false;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.autoFocus) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          _searchFocusNode.requestFocus();
+        }
+      });
+    }
+  }
 
   @override
   void dispose() {
@@ -251,12 +268,11 @@ class _ScanScreenState extends State<ScanScreen> {
     }
 
     return Scaffold(
-      appBar: const AppHeaderTopBar(title: 'Buscar y Comparar'),
-      floatingActionButton: null,
       body: SafeArea(
+        bottom: true,
         child: Column(
           children: [
-            // Barra de búsqueda con lupa predictiva, micrófono y botón de escáner
+            // Barra de búsqueda superior con botón de volver, escáner integrado y autocompletado
             ScanSearchBar(
               controller: _searchController,
               focusNode: _searchFocusNode,
@@ -269,6 +285,7 @@ class _ScanScreenState extends State<ScanScreen> {
                 _onSearchChanged('');
               },
               onScanner: () => _openScanner(context),
+              onBackToHome: () => Navigator.of(context).pop(),
             ),
             // Contenedor principal con overlay de sugerencias predictivas
             Expanded(
@@ -327,6 +344,8 @@ class _ScanScreenState extends State<ScanScreen> {
                 ],
               ),
             ),
+            // Banner publicitario inferior integrado suavemente
+            const CompraMasBannerAd(),
           ],
         ),
       ),

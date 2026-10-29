@@ -11,6 +11,7 @@ class ScanSearchBar extends StatelessWidget {
   final VoidCallback onBackToSearch;
   final VoidCallback onClear;
   final VoidCallback onScanner;
+  final VoidCallback? onBackToHome;
 
   const ScanSearchBar({
     super.key,
@@ -22,6 +23,7 @@ class ScanSearchBar extends StatelessWidget {
     required this.onBackToSearch,
     required this.onClear,
     required this.onScanner,
+    this.onBackToHome,
   });
 
   @override
@@ -55,9 +57,17 @@ class ScanSearchBar extends StatelessWidget {
               IconButton(
                 icon: const Icon(Icons.arrow_back_rounded),
                 color: theme.colorScheme.primary,
-                tooltip: 'Volver a la pantalla de búsqueda',
+                tooltip: 'Volver a la búsqueda',
                 splashRadius: 20,
                 onPressed: onBackToSearch,
+              )
+            else if (onBackToHome != null)
+              IconButton(
+                icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
+                color: theme.colorScheme.primary,
+                tooltip: 'Volver al inicio',
+                splashRadius: 20,
+                onPressed: onBackToHome,
               )
             else ...[
               const SizedBox(width: 12),

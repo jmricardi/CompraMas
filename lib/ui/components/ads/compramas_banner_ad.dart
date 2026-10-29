@@ -6,16 +6,30 @@ import '../../../core/services/ad_manager.dart';
 import '../../../models/house_ad_model.dart';
 
 class CompraMasBannerAd extends StatefulWidget {
-  final double widthDp;
-  final double heightDp;
+  final double? widthDp;
+  final double? heightDp;
   final bool allowHouseFallback;
 
   const CompraMasBannerAd({
     super.key,
-    this.widthDp = 360,
-    this.heightDp = 50,
+    this.widthDp,
+    this.heightDp,
     this.allowHouseFallback = true,
   });
+
+  /// Calcula la altura responsiva según las reglas de Prisma Noticias:
+  /// - Teléfonos (shortestSide < 600 dp): 60.0 dp
+  /// - Tablets (shortestSide >= 600 dp): 90.0 dp
+  /// - Límite de seguridad: Clampeado a máximo 15% del alto total de pantalla.
+  static double getResponsiveHeight(BuildContext context) {
+    final mediaQuery = MediaQuery.sizeOf(context);
+    final shortestSide = mediaQuery.shortestSide;
+    final screenHeight = mediaQuery.height;
+    final isTablet = shortestSide >= 600;
+    final double targetHeight = isTablet ? 90.0 : 60.0;
+    final maxHeight = screenHeight * 0.15;
+    return targetHeight > maxHeight ? maxHeight : targetHeight;
+  }
 
   @override
   State<CompraMasBannerAd> createState() => _CompraMasBannerAdState();
@@ -54,29 +68,32 @@ class _CompraMasBannerAdState extends State<CompraMasBannerAd> {
       return const SizedBox.shrink();
     }
 
+    final effectiveHeight = widget.heightDp ?? CompraMasBannerAd.getResponsiveHeight(context);
+    final effectiveWidth = widget.widthDp ?? MediaQuery.sizeOf(context).width;
+
     if (_useHouseAd && _selectedHouseAd != null) {
-      return _buildHouseBanner(_selectedHouseAd!);
+      return _buildHouseBanner(_selectedHouseAd!, effectiveHeight);
     }
 
     return Container(
       width: double.infinity,
-      height: widget.heightDp,
+      height: effectiveHeight,
       alignment: Alignment.center,
       child: AndroidView(
         viewType: 'dev.arandulabs.compramas/inline_banner_view',
         creationParams: {
-          'widthDp': widget.widthDp.toInt(),
-          'heightDp': widget.heightDp.toInt(),
+          'widthDp': effectiveWidth.toInt(),
+          'heightDp': effectiveHeight.toInt(),
         },
         creationParamsCodec: const StandardMessageCodec(),
       ),
     );
   }
 
-  Widget _buildHouseBanner(HouseAd ad) {
+  Widget _buildHouseBanner(HouseAd ad, double height) {
     return Container(
       width: double.infinity,
-      height: widget.heightDp,
+      height: height,
       margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
         color: const Color(0xFF047857),
@@ -91,8 +108,8 @@ class _CompraMasBannerAdState extends State<CompraMasBannerAd> {
                 borderRadius: const BorderRadius.horizontal(left: Radius.circular(8)),
                 child: CachedNetworkImage(
                   imageUrl: ad.imageUrl,
-                  height: widget.heightDp,
-                  width: widget.heightDp * 1.5,
+                  height: height,
+                  width: height * 1.5,
                   fit: BoxFit.cover,
                 ),
               ),

@@ -39,15 +39,18 @@ void main() {
       expect(find.byType(HeroSearchScanCard), findsOneWidget);
       expect(find.text('Buscar y Escanear'), findsOneWidget);
 
-      // 3. Verifica los 4 bloques secundarios en cuadrícula 2x2
+      // 3. Verifica los 5 bloques secundarios del tablero Bento
       expect(find.byType(BentoShoppingListCard), findsOneWidget);
       expect(find.text('Mi Lista'), findsOneWidget);
 
-      expect(find.byType(BentoDiscountsCard), findsOneWidget);
+      expect(find.byType(BentoOffersCard), findsOneWidget);
       expect(find.text('Ofertas'), findsOneWidget);
 
+      expect(find.byType(BentoDiscountsCard), findsOneWidget);
+      expect(find.text('Descuentos'), findsOneWidget);
+
       expect(find.byType(BentoFuelCard), findsOneWidget);
-      expect(find.text('Combustibles'), findsOneWidget);
+      expect(find.text('Combustible'), findsOneWidget);
 
       expect(find.byType(BentoSettingsCard), findsOneWidget);
       expect(find.text('Ajustes'), findsOneWidget);
@@ -56,9 +59,12 @@ void main() {
       await tester.tap(find.byType(AnimatedClayShoppingCart));
       await tester.pump(const Duration(milliseconds: 100));
 
-      // 5. Prueba interacción táctil sobre tarjeta de ajustes
+      // 5. Scroll para asegurar visibilidad y prueba interacción táctil sobre tarjeta de ajustes
+      await tester.ensureVisible(find.byType(BentoSettingsCard));
+      await tester.pump(const Duration(milliseconds: 100));
+
       await tester.tap(find.byType(BentoSettingsCard));
-      await tester.pumpAndSettle();
+      await tester.pump(const Duration(milliseconds: 350));
 
       // Debería navegar a la pantalla de Ajustes
       expect(find.text('Ajustes'), findsWidgets);

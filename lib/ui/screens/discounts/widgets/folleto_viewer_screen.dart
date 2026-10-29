@@ -203,10 +203,73 @@ class _FolletoViewerScreenState extends State<FolletoViewerScreen> {
   Widget _buildMagazineSwipeView() {
     final total = _totalSlides;
     if (total == 0) {
-      return const Center(
-        child: Text(
-          'No hay páginas disponibles en este folleto.',
-          style: TextStyle(color: Colors.white70),
+      final target = widget.folleto.visorUrl ?? widget.folleto.urlOficialCadena;
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(28.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.08),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.auto_stories_rounded,
+                  size: 56,
+                  color: Color(0xFF10B981),
+                ),
+              ),
+              const SizedBox(height: 20),
+              Text(
+                widget.folleto.titulo,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                'Este catálogo de ${widget.folleto.cadena} se encuentra disponible directamente en el visor digital oficial de la cadena.',
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  color: Colors.white70,
+                  fontSize: 13,
+                  height: 1.4,
+                ),
+              ),
+              const SizedBox(height: 24),
+              ElevatedButton.icon(
+                onPressed: () {
+                  launchUrl(Uri.parse(target), mode: LaunchMode.externalApplication);
+                },
+                icon: const Icon(Icons.open_in_new_rounded, size: 18),
+                label: const Text('Abrir folleto en línea'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF10B981),
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  elevation: 2,
+                ),
+              ),
+              if (_ofertas.isNotEmpty) ...[
+                const SizedBox(height: 12),
+                TextButton.icon(
+                  onPressed: () => setState(() => _showGridMode = true),
+                  icon: const Icon(Icons.list_alt_rounded, size: 18, color: Color(0xFF6EE7B7)),
+                  label: Text(
+                    'Ver ${_ofertas.length} productos destacados',
+                    style: const TextStyle(color: Color(0xFF6EE7B7), fontWeight: FontWeight.w600),
+                  ),
+                ),
+              ],
+            ],
+          ),
         ),
       );
     }

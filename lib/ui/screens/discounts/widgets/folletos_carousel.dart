@@ -32,7 +32,15 @@ class FolletosCarousel extends StatelessWidget {
       );
     }
 
-    if (folletos.isEmpty) {
+    // Filtrar folletos cuya fecha ya expiró estrictamente (antes del inicio de hoy)
+    final hoy = DateTime.now();
+    final inicioHoy = DateTime(hoy.year, hoy.month, hoy.day);
+    final folletosVigentes = folletos.where((f) {
+      if (f.fechaHasta == null) return true;
+      return !f.fechaHasta!.isBefore(inicioHoy);
+    }).toList();
+
+    if (folletosVigentes.isEmpty) {
       return const SizedBox.shrink();
     }
 
@@ -55,7 +63,7 @@ class FolletosCarousel extends StatelessWidget {
                 ],
               ),
               Text(
-                '${folletos.length}',
+                '${folletosVigentes.length}',
                 style: TextStyle(
                   color: Colors.grey.shade600,
                   fontWeight: FontWeight.bold,
@@ -70,10 +78,10 @@ class FolletosCarousel extends StatelessWidget {
           child: ListView.separated(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
             scrollDirection: Axis.horizontal,
-            itemCount: folletos.length,
+            itemCount: folletosVigentes.length,
             separatorBuilder: (_, _) => const SizedBox(width: 14),
             itemBuilder: (context, index) {
-              final folleto = folletos[index];
+              final folleto = folletosVigentes[index];
               return _FolletoCard(
                 folleto: folleto,
                 onTap: () => _abrirVisor(context, folleto),
@@ -96,10 +104,17 @@ class _FolletoCard extends StatelessWidget {
   });
 
   String _formatearVigencia() {
-    if (folleto.fechaHasta == null) return 'Oferta vigente';
-    final d = folleto.fechaHasta!;
-    final dia = d.day.toString().padLeft(2, '0');
-    final mes = d.month.toString().padLeft(2, '0');
+    final DateTime targetDate;
+    if (folleto.fechaHasta != null) {
+      targetDate = folleto.fechaHasta!;
+    } else {
+      // Si no tiene fecha_hasta definida, calcular el próximo domingo de la semana en curso
+      final now = DateTime.now();
+      final daysUntilSunday = DateTime.sunday - now.weekday;
+      targetDate = now.add(Duration(days: daysUntilSunday >= 0 ? daysUntilSunday : 7));
+    }
+    final dia = targetDate.day.toString().padLeft(2, '0');
+    final mes = targetDate.month.toString().padLeft(2, '0');
     return 'Hasta $dia/$mes';
   }
 

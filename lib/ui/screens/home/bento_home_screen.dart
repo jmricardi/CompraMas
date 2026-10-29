@@ -1,24 +1,54 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
+import '../../../core/services/ad_manager.dart';
 import '../../components/clay/animated_clay_shopping_cart.dart';
+import '../../components/location_permission_primer.dart';
+import '../../components/ads/compramas_banner_ad.dart';
 import 'widgets/hero_search_scan_card.dart';
 import 'widgets/bento_secondary_cards.dart';
 import '../scan/scan_screen.dart';
 import '../scan/scanner_view.dart';
 import '../shopping_list/shopping_lists_screen.dart';
-import '../discounts/discounts_screen.dart';
+import '../discounts/offers_screen.dart';
+import '../discounts/promotions_screen.dart';
 import '../fuel/fuel_map_screen.dart';
 import '../settings/settings_screen.dart';
-import '../../components/ads/compramas_banner_ad.dart';
 
 /// Tablero Bento Grid interactivo con estética 3D Claymorphism.
 ///
 /// Sin barra inferior rígida: la pantalla entera es un tablero táctil compuesto
-/// por 5 bloques con bordes redondeados pronunciados (squircles) y física de
-/// rebote elástico (fluid spring bounce).
-class BentoHomeScreen extends StatelessWidget {
+/// por el bloque Hero (Buscar y Escanear) y 5 bloques secundarios interactivos:
+/// - Mi Lista (libreta 3D)
+/// - Ofertas y Folletos (etiqueta 3D)
+/// - Descuentos y Promos (tarjeta 3D)
+/// - Combustible (surtidor 3D)
+/// - Ajustes (engranaje 3D)
+class BentoHomeScreen extends StatefulWidget {
   const BentoHomeScreen({super.key});
 
-  void _navigateTo(BuildContext context, Widget screen) {
+  @override
+  State<BentoHomeScreen> createState() => _BentoHomeScreenState();
+}
+
+class _BentoHomeScreenState extends State<BentoHomeScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      // 1. Inicialización diferida de redes publicitarias tras renderizar la UI
+      unawaited(AdManager.instance.initialize());
+
+      // 2. Verificación de permisos de ubicación mediante el diálogo Primer Claymorphic
+      _checkLocationPrimer();
+    });
+  }
+
+  Future<void> _checkLocationPrimer() async {
+    await LocationPermissionPrimerDialog.checkAndRequestLocation(context);
+  }
+
+  void _navigateTo(Widget screen) {
     Navigator.of(context).push(
       PageRouteBuilder(
         pageBuilder: (_, animation, secondaryAnimation) => screen,
@@ -39,7 +69,7 @@ class BentoHomeScreen extends StatelessWidget {
     );
   }
 
-  void _openBarcodeScanner(BuildContext context) {
+  void _openBarcodeScanner() {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -51,7 +81,7 @@ class BentoHomeScreen extends StatelessWidget {
           child: ScannerView(
             onBarcodeScanned: (barcode) {
               Navigator.of(ctx).pop();
-              _navigateTo(context, const ScanScreen());
+              _navigateTo(const ScanScreen());
             },
           ),
         ),
@@ -83,74 +113,81 @@ class BentoHomeScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // 1. Cabecera de Marca con Carrito 3D de Compras Interactivo
+                    // 1. Cabecera de Marca con Carrito 3D interactivo
                     _BentoBrandHeader(isDark: isDark),
-
-                    const SizedBox(height: 20),
-
-                    // 2. Bloque Hero (Principal, superior ancho): Buscar y Escanear
-                    HeroSearchScanCard(
-                      onSearchTap: () => _navigateTo(context, const ScanScreen()),
-                      onScanBarcodeTap: () => _openBarcodeScanner(context),
-                    ),
 
                     const SizedBox(height: 18),
 
-                    // 3. Cuadrícula Bento Inferior 2x2 (Bloques secundarios)
+                    // 2. Bloque Hero: Buscar y Escanear (Abre pantalla por encima con autofoco)
+                    HeroSearchScanCard(
+                      onSearchTap: () => _navigateTo(
+                        const ScanScreen(autoFocus: true),
+                      ),
+                      onScanBarcodeTap: _openBarcodeScanner,
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    // 3. Fila 1: Mi Lista & Ofertas y Folletos
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Columna Izquierda: Mi Lista + Combustibles
                         Expanded(
-                          child: Column(
-                            children: [
-                              BentoShoppingListCard(
-                                onTap: () => _navigateTo(
-                                  context,
-                                  const ShoppingListsScreen(),
-                                ),
-                              ),
-                              const SizedBox(height: 18),
-                              BentoFuelCard(
-                                onTap: () => _navigateTo(
-                                  context,
-                                  const FuelMapScreen(),
-                                ),
-                              ),
-                            ],
+                          child: BentoShoppingListCard(
+                            onTap: () => _navigateTo(
+                              const ShoppingListsScreen(),
+                            ),
                           ),
                         ),
-
-                        const SizedBox(width: 16),
-
-                        // Columna Derecha: Ofertas + Ajustes
+                        const SizedBox(width: 14),
                         Expanded(
-                          child: Column(
-                            children: [
-                              BentoDiscountsCard(
-                                onTap: () => _navigateTo(
-                                  context,
-                                  const DiscountsScreen(),
-                                ),
-                              ),
-                              const SizedBox(height: 18),
-                              BentoSettingsCard(
-                                onTap: () => _navigateTo(
-                                  context,
-                                  const SettingsScreen(),
-                                ),
-                              ),
-                            ],
+                          child: BentoOffersCard(
+                            onTap: () => _navigateTo(
+                              const OffersScreen(),
+                            ),
                           ),
                         ),
                       ],
+                    ),
+
+                    const SizedBox(height: 14),
+
+                    // 4. Fila 2: Descuentos Bancarios & Combustible
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: BentoDiscountsCard(
+                            onTap: () => _navigateTo(
+                              const PromotionsScreen(),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: BentoFuelCard(
+                            onTap: () => _navigateTo(
+                              const FuelMapScreen(),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 14),
+
+                    // 5. Fila 3: Ajustes
+                    BentoSettingsCard(
+                      onTap: () => _navigateTo(
+                        const SettingsScreen(),
+                      ),
                     ),
                   ],
                 ),
               ),
             ),
 
-            // 4. Banner Publicitario Integrado suavemente al pie
+            // 6. Banner Publicitario responsivo según especificaciones Prisma
             const CompraMasBannerAd(),
           ],
         ),
@@ -167,15 +204,15 @@ class _BentoBrandHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 10.0),
+      padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 8.0),
       child: Row(
         children: [
-          // Ícono de Carrito 3D animado con física de fluidos y micro-movimientos
-          const AnimatedClayShoppingCart(size: 60.0),
+          // Ícono de Carrito 3D con oscilación senoidal de respiración y física fluida
+          const AnimatedClayShoppingCart(size: 58.0),
 
           const SizedBox(width: 14),
 
-          // Título de la App y Subtítulo
+          // Título de la Aplicación
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -192,12 +229,12 @@ class _BentoBrandHeader extends StatelessWidget {
                         letterSpacing: -0.6,
                       ),
                     ),
-                    Text(
+                    const Text(
                       'Mas',
                       style: TextStyle(
                         fontSize: 26,
                         fontWeight: FontWeight.w900,
-                        color: const Color(0xFF059669),
+                        color: Color(0xFF059669),
                         letterSpacing: -0.6,
                       ),
                     ),

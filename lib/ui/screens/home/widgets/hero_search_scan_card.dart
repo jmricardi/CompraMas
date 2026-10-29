@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../components/clay/clay_squircle_card.dart';
-import '../../../components/clay/clay_3d_painters.dart';
+import '../../../components/clay/animated_clay_magnifier_icon.dart';
 
 /// Bloque Hero Bento Grid: Función 'Buscar y Escanear'.
 /// Protagonizado por la Lupa 3D inflada con lente translúcida brillante,
@@ -52,10 +52,10 @@ class _HeroSearchScanCardState extends State<HeroSearchScanCard> {
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // Lupa 3D inflada con lente brillante
+              // Lupa 3D inflada con lente brillante animada (Lottie fluid style)
               const Hero(
                 tag: 'hero_3d_magnifier',
-                child: Clay3DMagnifierIcon(size: 68.0),
+                child: AnimatedClayMagnifierIcon(size: 68.0),
               ),
               const SizedBox(width: 16),
               Expanded(

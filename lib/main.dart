@@ -10,6 +10,7 @@ import 'core/cache/hive_manager.dart';
 import 'services/locale_service.dart';
 import 'services/settings_service.dart';
 import 'viewmodels/scanner_viewmodel.dart';
+import 'viewmodels/shopping_assistant_viewmodel.dart';
 import 'viewmodels/shopping_list_viewmodel.dart';
 import 'viewmodels/discount_viewmodel.dart';
 import 'viewmodels/fuel_viewmodel.dart';
@@ -73,6 +74,7 @@ class CompraMasApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => SettingsService()),
         ChangeNotifierProvider(create: (_) => ScannerViewModel()),
         ChangeNotifierProvider(create: (_) => ShoppingListViewModel()..loadAllLists()),
+        ChangeNotifierProvider(create: (_) => ShoppingAssistantViewModel()),
         ChangeNotifierProvider(create: (_) => DiscountViewModel()..loadDiscounts()),
         ChangeNotifierProvider(create: (_) => FuelViewModel()),
       ],

@@ -1,229 +1,359 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../../models/shopping_assistant_model.dart';
+import '../../../utils/format_utils.dart';
+import '../../../viewmodels/shopping_assistant_viewmodel.dart';
+import '../../../viewmodels/shopping_list_viewmodel.dart';
 import '../../components/ads/compramas_banner_ad.dart';
-import '../../components/clay/clay_squircle_card.dart';
+import '../scan/scanner_view.dart';
+import 'widgets/assistant_bottom_summary_bar.dart';
+import 'widgets/assistant_product_cards_carousel.dart';
+import 'widgets/product_confirmation_dialog.dart';
+import 'widgets/store_selector_sheet.dart';
 
-/// Pantalla 'Asistente de Compra':
-/// Asistente inteligente de compras, optimización de presupuesto,
-/// armado de canasta económica y recomendaciones de ahorro entre comercios.
-class ShoppingAssistantScreen extends StatelessWidget {
+/// Pantalla interactiva "Asistente de Compras" (Shopping Assistant Mode)
+/// que acompaña al usuario en tiempo real durante su compra en el supermercado.
+class ShoppingAssistantScreen extends StatefulWidget {
   const ShoppingAssistantScreen({super.key});
+
+  @override
+  State<ShoppingAssistantScreen> createState() =>
+      _ShoppingAssistantScreenState();
+}
+
+class _ShoppingAssistantScreenState extends State<ShoppingAssistantScreen> {
+  bool _isProcessingAction = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      unawaited(context.read<ShoppingAssistantViewModel>().initSession());
+    });
+  }
+
+  void _openFullStoreSelector(ShoppingAssistantViewModel vm) {
+    StoreSelectorSheet.show(
+      context,
+      stores: vm.nearbyStores,
+      currentStore: vm.selectedStore,
+      onSelected: vm.selectStore,
+      onCustomStoreSubmitted: (name, addr) =>
+          vm.setCustomStore(name, branchAddress: addr),
+    );
+  }
+
+  Future<void> _startBarcodeScanFlow(ShoppingAssistantViewModel vm) async {
+    String? scannedCode;
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => ScannerView(
+          onBarcodeScanned: (code) {
+            scannedCode = code.trim();
+          },
+        ),
+      ),
+    );
+
+    if (!mounted || scannedCode == null || scannedCode!.isEmpty) return;
+
+    final lookupResult = await vm.lookupBarcode(scannedCode!);
+    if (!mounted) return;
+
+    final confirmed = await AssistantProductConfirmationDialog.show(
+      context,
+      lookupResult: lookupResult,
+    );
+    if (!mounted || confirmed == null) return;
+
+    vm.confirmAndAddProduct(
+      ean: confirmed.ean,
+      name: confirmed.name,
+      brand: confirmed.brand,
+      content: confirmed.content,
+      unitPrice: confirmed.price,
+      quantity: confirmed.quantity,
+      imageUrl: confirmed.imageUrl,
+      source: confirmed.source,
+    );
+  }
+
+  Future<void> _openManualProductDialog(ShoppingAssistantViewModel vm) async {
+    const manualLookup = AssistantProductLookupResult(
+      found: false,
+      source: 'manual',
+      ean: '',
+      name: '',
+      brand: '',
+      content: '1 un',
+      price: 0.0,
+    );
+    final confirmed = await AssistantProductConfirmationDialog.show(
+      context,
+      lookupResult: manualLookup,
+    );
+    if (!mounted || confirmed == null) return;
+
+    vm.confirmAndAddProduct(
+      ean: confirmed.ean,
+      name: confirmed.name,
+      brand: confirmed.brand,
+      content: confirmed.content,
+      unitPrice: confirmed.price,
+      quantity: confirmed.quantity,
+      source: 'manual',
+    );
+  }
+
+  Future<void> _openEditItemDialog(
+    ShoppingAssistantViewModel vm,
+    AssistantCartItem item,
+  ) async {
+    final existingLookup = AssistantProductLookupResult(
+      found: true,
+      source: item.source,
+      ean: item.ean,
+      name: item.name,
+      brand: item.brand,
+      content: item.content,
+      price: item.unitPrice,
+      imageUrl: item.imageUrl,
+    );
+
+    final confirmed = await AssistantProductConfirmationDialog.show(
+      context,
+      lookupResult: existingLookup,
+      initialQuantity: item.quantity,
+      isEditingExisting: true,
+    );
+    if (!mounted || confirmed == null) return;
+
+    vm.updateCartItem(
+      itemId: item.id,
+      name: confirmed.name,
+      brand: confirmed.brand,
+      content: confirmed.content,
+      unitPrice: confirmed.price,
+      quantity: confirmed.quantity,
+    );
+  }
+
+  Future<void> _openDiscountConfigDialog(ShoppingAssistantViewModel vm) async {
+    final result = await showDialog<Map<String, double>>(
+      context: context,
+      builder: (_) => AssistantDiscountDialog(
+        initialPercentage: vm.discountPercentage,
+        initialCap: vm.discountCap,
+        initialManualAmount: vm.manualDiscountAmount,
+      ),
+    );
+    if (!mounted || result == null) return;
+
+    vm.updateDiscountConfig(
+      percentage: result['pct'],
+      cap: result['cap'],
+      manualAmount: result['fixed'],
+    );
+  }
+
+  Future<void> _handleSaveAsList(ShoppingAssistantViewModel vm) async {
+    if (vm.cartItems.isEmpty) return;
+    setState(() => _isProcessingAction = true);
+    try {
+      final listVm = context.read<ShoppingListViewModel>();
+      await vm.saveAsReusableList(listVm);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Listado guardado exitosamente en "Mis Listas".'),
+          backgroundColor: Color(0xFF0D9488),
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isProcessingAction = false);
+      }
+    }
+  }
+
+  Future<void> _handleFinalizePurchase(ShoppingAssistantViewModel vm) async {
+    if (vm.cartItems.isEmpty) return;
+
+    final storeName = vm.selectedStore?.displayLabel ?? 'Supermercado';
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        title: const Text(
+          'Finalizar Compra',
+          style: TextStyle(fontWeight: FontWeight.w900),
+        ),
+        content: Text(
+          'Se registrará la compra en $storeName con ${vm.totalUnitsCount} artículos por un total de ${AppFormatters.currency(vm.finalTotal)} en tu Historial de Compras.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('Cancelar'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            style: FilledButton.styleFrom(
+              backgroundColor: const Color(0xFF0D9488),
+            ),
+            child: const Text('Confirmar Compra'),
+          ),
+        ],
+      ),
+    );
+
+    if (!mounted || confirmed != true) return;
+
+    setState(() => _isProcessingAction = true);
+    try {
+      final listVm = context.read<ShoppingListViewModel>();
+      final ticket = await vm.finalizePurchase(listVm);
+      if (!mounted) return;
+
+      await showDialog<void>(
+        context: context,
+        builder: (_) => AssistantPurchaseTicketDialog(ticket: ticket),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isProcessingAction = false);
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    return Scaffold(
-      backgroundColor: isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
-      body: SafeArea(
-        bottom: true,
-        child: Column(
-          children: [
-            // 1. Cabecera limpia con estética Bento
-            Container(
-              padding: const EdgeInsets.fromLTRB(10, 10, 16, 12),
-              child: Row(
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
-                    onPressed: () => Navigator.of(context).pop(),
-                    tooltip: 'Volver',
-                  ),
-                  const SizedBox(width: 4),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          'Asistente de Compra',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w900,
-                            color: isDark ? Colors.white : const Color(0xFF0F172A),
-                            letterSpacing: -0.4,
-                          ),
-                        ),
-                        Text(
-                          'Optimización inteligente de tu presupuesto',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w500,
-                            color: isDark
-                                ? Colors.white.withValues(alpha: 0.6)
-                                : const Color(0xFF64748B),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            // 2. Contenido del Asistente
-            Expanded(
-              child: SingleChildScrollView(
-                physics: const BouncingScrollPhysics(),
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 260),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    // Tarjeta Hero del Asistente
-                    ClaySquircleCard(
-                      baseColor: isDark ? const Color(0xFF042F2E) : const Color(0xFFF0FDFA),
-                      borderRadius: 28.0,
-                      accentColor: const Color(0xFF14B8A6),
-                      padding: const EdgeInsets.all(20.0),
-                      child: Row(
-                        children: [
-                          Container(
-                            width: 56,
-                            height: 56,
-                            decoration: const BoxDecoration(
-                              shape: BoxShape.circle,
-                              gradient: RadialGradient(
-                                center: Alignment(-0.35, -0.35),
-                                colors: [
-                                  Color(0xFF5EEAD4),
-                                  Color(0xFF14B8A6),
-                                  Color(0xFF0F766E),
-                                ],
-                              ),
-                            ),
-                            child: const Icon(
-                              Icons.auto_awesome_rounded,
-                              size: 30,
-                              color: Colors.white,
-                            ),
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Tu asesor personal de ahorro',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w800,
-                                    color: isDark ? Colors.white : const Color(0xFF0F766E),
-                                    letterSpacing: -0.3,
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  'Calcula dónde te conviene comprar según los productos de tu lista y las ofertas activas.',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w500,
-                                    color: isDark ? Colors.white70 : const Color(0xFF115E59),
-                                    height: 1.35,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    const SizedBox(height: 18),
-
-                    // Funciones del Asistente (Canasta inteligente, división óptima, etc.)
-                    _buildFeatureCard(
-                      isDark: isDark,
-                      icon: Icons.splitscreen_rounded,
-                      color: const Color(0xFF6366F1),
-                      title: 'Dividir compra inteligente',
-                      subtitle: 'Descubre cuánto ahorras comprando parte en un supermercado y parte en otro cercano.',
-                    ),
-                    const SizedBox(height: 12),
-                    _buildFeatureCard(
-                      isDark: isDark,
-                      icon: Icons.trending_down_rounded,
-                      color: const Color(0xFF10B981),
-                      title: 'Sustitutos y marcas alternativas',
-                      subtitle: 'Productos equivalentes en el mismo cluster de mayor rendimiento por gramo o litro.',
-                    ),
-                    const SizedBox(height: 12),
-                    _buildFeatureCard(
-                      isDark: isDark,
-                      icon: Icons.calendar_month_rounded,
-                      color: const Color(0xFFF59E0B),
-                      title: 'Mejor día para comprar',
-                      subtitle: 'Combina los días de descuento bancario con las promociones semanales vigentes.',
-                    ),
-                  ],
+    return Consumer<ShoppingAssistantViewModel>(
+      builder: (context, vm, _) {
+        return Scaffold(
+          backgroundColor:
+              isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
+          body: SafeArea(
+            bottom: true,
+            child: Column(
+              children: [
+                _buildTopHeader(isDark, vm),
+                AssistantStoreHeaderBanner(
+                  selectedStore: vm.selectedStore,
+                  nearbyStores: vm.nearbyStores,
+                  isLoading: vm.isLoadingStores,
+                  onSelectStore: vm.selectStore,
+                  onOpenFullSelector: () => _openFullStoreSelector(vm),
+                  onRefreshGps: vm.refreshNearbyStores,
                 ),
-              ),
+                if (vm.isLookingUpBarcode) _buildLookupProgressBanner(),
+                Expanded(
+                  child: AssistantProductCardsList(
+                    items: vm.cartItems,
+                    onTapAddBarcode: () => _startBarcodeScanFlow(vm),
+                    onTapAddManual: () => _openManualProductDialog(vm),
+                    onIncrement: vm.incrementQuantity,
+                    onDecrement: vm.decrementQuantity,
+                    onRemove: vm.removeItem,
+                    onEditItem: (item) => _openEditItemDialog(vm, item),
+                  ),
+                ),
+                AssistantBottomSummaryBar(
+                  subtotal: vm.subtotal,
+                  discountAmount: vm.totalDiscount,
+                  discountPercentage: vm.discountPercentage,
+                  finalTotal: vm.finalTotal,
+                  totalArticles: vm.totalUnitsCount,
+                  hasItems: vm.cartItems.isNotEmpty,
+                  isProcessing: _isProcessingAction,
+                  onTapConfigureDiscount: () => _openDiscountConfigDialog(vm),
+                  onSaveAsList: () => _handleSaveAsList(vm),
+                  onFinalizePurchase: () => _handleFinalizePurchase(vm),
+                ),
+                const CompraMasBannerAd(),
+              ],
             ),
+          ),
+        );
+      },
+    );
+  }
 
-            // 3. Banner Publicitario responsivo al pie
-            const CompraMasBannerAd(),
-          ],
-        ),
+  Widget _buildTopHeader(bool isDark, ShoppingAssistantViewModel vm) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(8, 8, 12, 4),
+      child: Row(
+        children: [
+          IconButton(
+            icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
+            onPressed: () => Navigator.of(context).pop(),
+            tooltip: 'Volver',
+          ),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Asistente de Compras',
+                  style: TextStyle(
+                    fontSize: 19,
+                    fontWeight: FontWeight.w900,
+                    color: isDark ? Colors.white : const Color(0xFF0F172A),
+                    letterSpacing: -0.4,
+                  ),
+                ),
+                Text(
+                  'Escanea en góndola y controla tu gasto en vivo',
+                  style: TextStyle(
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.w500,
+                    color: isDark ? Colors.white60 : const Color(0xFF64748B),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          IconButton.filledTonal(
+            onPressed: () => _startBarcodeScanFlow(vm),
+            tooltip: 'Escanear código de barras',
+            icon: const Icon(Icons.qr_code_scanner_rounded, size: 20),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildFeatureCard({
-    required bool isDark,
-    required IconData icon,
-    required Color color,
-    required String title,
-    required String subtitle,
-  }) {
+  Widget _buildLookupProgressBanner() {
     return Container(
-      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
-        color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: isDark ? Colors.white.withValues(alpha: 0.08) : const Color(0xFFE2E8F0),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.04),
-            blurRadius: 10,
-            offset: const Offset(0, 3),
-          ),
-        ],
+        color: const Color(0xFF0D9488).withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(14),
       ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: const Row(
         children: [
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(14),
+          SizedBox(
+            width: 16,
+            height: 16,
+            child: CircularProgressIndicator(
+              strokeWidth: 2.2,
+              color: Color(0xFF0D9488),
             ),
-            child: Icon(icon, size: 24, color: color),
           ),
-          const SizedBox(width: 14),
+          SizedBox(width: 10),
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w800,
-                    color: isDark ? Colors.white : const Color(0xFF0F172A),
-                  ),
-                ),
-                const SizedBox(height: 3),
-                Text(
-                  subtitle,
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
-                    color: isDark ? Colors.white60 : const Color(0xFF64748B),
-                    height: 1.35,
-                  ),
-                ),
-              ],
+            child: Text(
+              'Buscando producto en Supabase / API VTEX...',
+              style: TextStyle(
+                fontSize: 12.5,
+                fontWeight: FontWeight.w700,
+                color: Color(0xFF0F766E),
+              ),
             ),
           ),
         ],

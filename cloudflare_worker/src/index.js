@@ -1,5 +1,6 @@
 import { corsHeaders, handleOptions } from './config/cors.js';
 import { handleProductosRoute } from './routes/productos.js';
+import { handleAsistenteRoute } from './routes/asistente.js';
 
 async function generateETag(data) {
   const msgUint8 = new TextEncoder().encode(data);
@@ -65,6 +66,8 @@ export default {
 
       if (url.pathname.startsWith('/api/productos')) {
         response = await handleProductosRoute(url, request, env);
+      } else if (url.pathname.startsWith('/api/asistente')) {
+        response = await handleAsistenteRoute(url, request, env, ctx);
       }
 
       if (!response) {

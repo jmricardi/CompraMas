@@ -65,6 +65,9 @@ export async function querySupabase(table, queryParams = {}, env, options = {}) 
   if (options.count) {
     headers['Prefer'] = `count=${options.count}`;
   }
+  if (options.prefer) {
+    headers['Prefer'] = options.prefer;
+  }
 
   const response = await fetchWithRetryAndTimeout(endpoint, {
     method: options.method || 'GET',
@@ -77,7 +80,17 @@ export async function querySupabase(table, queryParams = {}, env, options = {}) 
     throw new Error(`Supabase Error (${response.status}): ${errorText}`);
   }
 
-  return response.json();
+  const text = await response.text();
+  return text ? JSON.parse(text) : null;
+}
+
+export async function upsertSupabase(table, payload, env, onConflict = null) {
+  const queryParams = onConflict ? { on_conflict: onConflict } : {};
+  return querySupabase(table, queryParams, env, {
+    method: 'POST',
+    body: payload,
+    prefer: 'resolution=merge-duplicates,return=representation',
+  });
 }
 
 export async function batchQueryInChunks(table, idColumn, ids, baseQueryParams, env, chunkSize = 50) {

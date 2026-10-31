@@ -297,7 +297,8 @@ class _MiniQtyBtn extends StatelessWidget {
   }
 }
 
-/// Tarjeta "+" ubicada al final del listado de tarjetas horizontales para escanear e incorporar nuevos productos
+/// Tarjeta "+" ubicada al final del listado de tarjetas para escanear e incorporar nuevos productos
+/// con altura uniforme y compacta equivalente a las tarjetas de productos agregados.
 class AddProductPlusCard extends StatelessWidget {
   final bool isDark;
   final bool isEmptyCart;
@@ -316,85 +317,66 @@ class AddProductPlusCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return ClaySquircleCard(
       baseColor: isDark ? const Color(0xFF042F2E) : const Color(0xFFF0FDFA),
-      borderRadius: 24,
+      borderRadius: 22,
       accentColor: const Color(0xFF14B8A6),
-      padding: EdgeInsets.symmetric(
-        horizontal: 18,
-        vertical: isEmptyCart ? 28 : 16,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       onTap: onTapScan,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                width: 52,
-                height: 52,
-                decoration: const BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: RadialGradient(
-                    center: Alignment(-0.3, -0.3),
-                    colors: [
-                      Color(0xFF5EEAD4),
-                      Color(0xFF14B8A6),
-                      Color(0xFF0F766E),
-                    ],
+          Container(
+            width: 58,
+            height: 58,
+            decoration: const BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: RadialGradient(
+                center: Alignment(-0.3, -0.3),
+                colors: [
+                  Color(0xFF5EEAD4),
+                  Color(0xFF14B8A6),
+                  Color(0xFF0F766E),
+                ],
+              ),
+            ),
+            child: const Icon(
+              Icons.add_rounded,
+              size: 32,
+              color: Colors.white,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Agregar producto (+)',
+                  style: TextStyle(
+                    fontSize: 14.5,
+                    fontWeight: FontWeight.w900,
+                    color: isDark ? Colors.white : const Color(0xFF0F766E),
                   ),
                 ),
-                child: const Icon(
-                  Icons.add_rounded,
-                  size: 32,
-                  color: Colors.white,
+                const SizedBox(height: 2),
+                Text(
+                  'Escanear código o buscar',
+                  style: TextStyle(
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.w600,
+                    color: isDark ? Colors.white70 : const Color(0xFF115E59),
+                  ),
                 ),
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Agregar producto (+)',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w900,
-                        color: isDark ? Colors.white : const Color(0xFF0F766E),
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      'Pulsa para abrir el escáner de código de barras y consultar precio',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: isDark ? Colors.white70 : const Color(0xFF115E59),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const Icon(
-                Icons.qr_code_scanner_rounded,
-                size: 26,
-                color: Color(0xFF0D9488),
-              ),
-            ],
+              ],
+            ),
           ),
-          const SizedBox(height: 10),
-          Align(
-            alignment: Alignment.centerRight,
-            child: TextButton.icon(
-              onPressed: onTapManual,
-              style: TextButton.styleFrom(
-                visualDensity: VisualDensity.compact,
-                foregroundColor: const Color(0xFF0D9488),
-              ),
-              icon: const Icon(Icons.edit_note_rounded, size: 18),
-              label: const Text(
-                'O cargar sin código de barras',
-                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
-              ),
+          IconButton(
+            onPressed: onTapManual,
+            tooltip: 'Buscar por nombre o variedad',
+            icon: const Icon(
+              Icons.search_rounded,
+              color: Color(0xFF0D9488),
+              size: 22,
             ),
           ),
         ],

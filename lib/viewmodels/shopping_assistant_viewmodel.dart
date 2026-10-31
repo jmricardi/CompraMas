@@ -83,13 +83,13 @@ class ShoppingAssistantViewModel extends ChangeNotifier {
       );
 
   /// Inicializa la sesión recuperando el estado persistido y consultando comercios cercanos por GPS
-  Future<void> initSession({bool forceRefreshStores = false}) async {
+  Future<void> initSession({bool forceRefreshStores = false, double maxRadiusKm = 5.0}) async {
     if (!_initialized) {
       _initialized = true;
       _restoreSessionFromHive();
     }
     if (forceRefreshStores || _userLocation == null) {
-      await refreshNearbyStores();
+      await refreshNearbyStores(maxRadiusKm: maxRadiusKm);
     }
   }
 
@@ -137,8 +137,8 @@ class ShoppingAssistantViewModel extends ChangeNotifier {
     } catch (_) {}
   }
 
-  /// Obtiene la ubicación GPS actual y actualiza la lista de sucursales cercanas
-  Future<void> refreshNearbyStores() async {
+  /// Obtiene la ubicación GPS actual y actualiza la lista de sucursales cercanas respetando el radio configurado
+  Future<void> refreshNearbyStores({double maxRadiusKm = 5.0}) async {
     _isLoadingStores = true;
     notifyListeners();
 
@@ -147,6 +147,7 @@ class ShoppingAssistantViewModel extends ChangeNotifier {
       _nearbyStores = await _workerService.fetchNearbyStores(
         latitude: _userLocation?.latitude,
         longitude: _userLocation?.longitude,
+        maxRadiusKm: maxRadiusKm,
       );
     } catch (e) {
       debugPrint('[AssistantVM] Error al cargar comercios cercanos: $e');

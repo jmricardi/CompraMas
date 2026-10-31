@@ -1,16 +1,55 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
-/// Ícono 3D de Tarjeta de Descuentos / Promociones en estética Claymorphism.
-class Clay3DDiscountCardIcon extends StatelessWidget {
+/// Ícono 3D de Tarjeta de Descuentos / Promociones en estética Claymorphism animada.
+class Clay3DDiscountCardIcon extends StatefulWidget {
   final double size;
 
   const Clay3DDiscountCardIcon({super.key, this.size = 54.0});
 
   @override
+  State<Clay3DDiscountCardIcon> createState() => _Clay3DDiscountCardIconState();
+}
+
+class _Clay3DDiscountCardIconState extends State<Clay3DDiscountCardIcon>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _cardController;
+
+  @override
+  void initState() {
+    super.initState();
+    // Oscilación armónica de inclinación y flotación suave
+    _cardController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 2400),
+    )..repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _cardController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return CustomPaint(
-      size: Size(size, size),
-      painter: _Clay3DDiscountCardPainter(),
+    return AnimatedBuilder(
+      animation: _cardController,
+      builder: (context, _) {
+        final floatY = math.sin(_cardController.value * math.pi) * 3.0;
+        final tilt = (math.sin(_cardController.value * math.pi) * 0.08) - 0.04;
+
+        return Transform.translate(
+          offset: Offset(0, -floatY),
+          child: Transform.rotate(
+            angle: tilt,
+            child: CustomPaint(
+              size: Size(widget.size, widget.size),
+              painter: _Clay3DDiscountCardPainter(),
+            ),
+          ),
+        );
+      },
     );
   }
 }

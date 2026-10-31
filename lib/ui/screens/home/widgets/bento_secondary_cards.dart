@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import '../../../components/clay/clay_squircle_card.dart';
 import '../../../components/clay/clay_3d_painters.dart';
@@ -99,45 +100,83 @@ class BentoShoppingAssistantCard extends StatelessWidget {
   }
 }
 
-/// Ícono 3D de arcilla para Asistente Inteligente de Compra
-class Clay3DAssistantIcon extends StatelessWidget {
+/// Ícono 3D de arcilla para Asistente Inteligente de Compra con pulso vivo
+class Clay3DAssistantIcon extends StatefulWidget {
   final double size;
 
   const Clay3DAssistantIcon({super.key, this.size = 54.0});
 
   @override
+  State<Clay3DAssistantIcon> createState() => _Clay3DAssistantIconState();
+}
+
+class _Clay3DAssistantIconState extends State<Clay3DAssistantIcon>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _pulseController;
+
+  @override
+  void initState() {
+    super.initState();
+    _pulseController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 2200),
+    )..repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _pulseController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        gradient: const RadialGradient(
-          center: Alignment(-0.35, -0.35),
-          colors: [
-            Color(0xFF5EEAD4),
-            Color(0xFF14B8A6),
-            Color(0xFF0F766E),
+    return AnimatedBuilder(
+      animation: _pulseController,
+      builder: (context, child) {
+        final scale = 0.96 + (math.sin(_pulseController.value * math.pi) * 0.08);
+        final floatY = math.sin(_pulseController.value * math.pi) * 3.0;
+
+        return Transform.translate(
+          offset: Offset(0, -floatY),
+          child: Transform.scale(
+            scale: scale,
+            child: child,
+          ),
+        );
+      },
+      child: Container(
+        width: widget.size,
+        height: widget.size,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          gradient: const RadialGradient(
+            center: Alignment(-0.35, -0.35),
+            colors: [
+              Color(0xFF5EEAD4),
+              Color(0xFF14B8A6),
+              Color(0xFF0F766E),
+            ],
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF14B8A6).withValues(alpha: 0.35),
+              blurRadius: 12,
+              offset: const Offset(0, 5),
+            ),
+            const BoxShadow(
+              color: Colors.white60,
+              blurRadius: 4,
+              offset: Offset(-2, -2),
+            ),
           ],
         ),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF14B8A6).withValues(alpha: 0.35),
-            blurRadius: 12,
-            offset: const Offset(0, 5),
+        child: Center(
+          child: Icon(
+            Icons.auto_awesome_rounded,
+            size: widget.size * 0.54,
+            color: Colors.white,
           ),
-          const BoxShadow(
-            color: Colors.white60,
-            blurRadius: 4,
-            offset: Offset(-2, -2),
-          ),
-        ],
-      ),
-      child: Center(
-        child: Icon(
-          Icons.auto_awesome_rounded,
-          size: size * 0.54,
-          color: Colors.white,
         ),
       ),
     );

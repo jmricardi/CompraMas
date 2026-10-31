@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:provider/provider.dart';
 import 'package:compramas/models/shopping_assistant_model.dart';
+import 'package:compramas/services/settings_service.dart';
 import 'package:compramas/services/shopping_assistant_worker_service.dart';
 import 'package:compramas/ui/screens/assistant/shopping_assistant_screen.dart';
 import 'package:compramas/viewmodels/shopping_assistant_viewmodel.dart';
@@ -94,10 +95,12 @@ void main() {
     testWidgets('ShoppingAssistantScreen renderiza selector de comercio, tarjeta + y pie financiero', (tester) async {
       final assistantVm = ShoppingAssistantViewModel();
       final listVm = ShoppingListViewModel();
+      final settingsService = SettingsService();
 
       await tester.pumpWidget(
         MultiProvider(
           providers: [
+            ChangeNotifierProvider<SettingsService>.value(value: settingsService),
             ChangeNotifierProvider<ShoppingAssistantViewModel>.value(value: assistantVm),
             ChangeNotifierProvider<ShoppingListViewModel>.value(value: listVm),
           ],
@@ -109,7 +112,7 @@ void main() {
 
       await tester.pump();
 
-      expect(find.text('Asistente de Compras'), findsOneWidget);
+      expect(find.text('Asistente de compras'), findsOneWidget);
       expect(find.text('Agregar producto (+)'), findsOneWidget);
       expect(find.text('TOTAL A PAGAR'), findsOneWidget);
       expect(find.text('Guardar Lista'), findsOneWidget);

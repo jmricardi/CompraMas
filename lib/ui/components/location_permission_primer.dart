@@ -14,6 +14,10 @@ class AppPermissionsPrimerDialog extends StatelessWidget {
   final bool needsLocation;
   final bool needsCamera;
 
+  /// Bandera estática en memoria para no volver a molestar con el diálogo explicativo
+  /// una vez que el usuario ya interactuó con él durante la sesión actual de la app.
+  static bool _hasPromptedThisSession = false;
+
   const AppPermissionsPrimerDialog({
     super.key,
     this.needsLocation = true,
@@ -23,6 +27,10 @@ class AppPermissionsPrimerDialog extends StatelessWidget {
   /// Comprueba el estado de permisos y, si falta al menos uno, muestra la
   /// pantalla explicativa antes de solicitar los permisos nativos del sistema.
   static Future<bool> checkAndRequestPermissions(BuildContext context) async {
+    if (_hasPromptedThisSession) {
+      return false;
+    }
+
     try {
       final locStatus = await Permission.location.status;
       final camStatus = await Permission.camera.status;
@@ -32,14 +40,17 @@ class AppPermissionsPrimerDialog extends StatelessWidget {
 
       // Si ambos permisos ya fueron concedidos, no interrumpir al usuario
       if (isLocGranted && isCamGranted) {
+        _hasPromptedThisSession = true;
         return true;
       }
 
       // Si alguno fue denegado permanentemente y el otro ya concedido, omitir
       if (locStatus.isPermanentlyDenied && camStatus.isPermanentlyDenied) {
+        _hasPromptedThisSession = true;
         return false;
       }
 
+      _hasPromptedThisSession = true;
       if (!context.mounted) return false;
 
       // Mostrar pantalla unificada con estética Claymorphism

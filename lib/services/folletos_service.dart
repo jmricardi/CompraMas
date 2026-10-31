@@ -40,8 +40,25 @@ class FolletosService {
           .map((item) => FolletoModel.fromJson(item as Map<String, dynamic>))
           .toList();
 
+      // Deduplicar folletos por combinación de cadena + título + fechaHasta
+      final Map<String, FolletoModel> dedupMap = {};
+      for (final f in list) {
+        final key = '${f.cadena.toLowerCase()}_${f.titulo.toLowerCase().trim()}_${f.fechaHasta?.toIso8601String() ?? 'null'}';
+        if (!dedupMap.containsKey(key)) {
+          dedupMap[key] = f;
+        } else {
+          // Si el duplicado tiene más páginas o portada válida, conservarlo
+          final existing = dedupMap[key]!;
+          if (f.paginasUrls.length > existing.paginasUrls.length ||
+              (existing.portadaUrl.isEmpty && f.portadaUrl.isNotEmpty)) {
+            dedupMap[key] = f;
+          }
+        }
+      }
+      final deduplicatedList = dedupMap.values.toList();
+
       // Priorizar folletos bancarios/medios de pago en 1° lugar, luego folletos con páginas completas
-      list.sort((a, b) {
+      deduplicatedList.sort((a, b) {
         if (a.esBancario && !b.esBancario) return -1;
         if (!a.esBancario && b.esBancario) return 1;
         final pagesA = a.paginasUrls.length;
@@ -51,7 +68,7 @@ class FolletosService {
             .compareTo(b.fechaHasta ?? DateTime(2099));
       });
 
-      return list;
+      return deduplicatedList;
     } catch (e, st) {
       debugPrint('[FolletosService] Error al obtener folletos: $e\n$st');
       return [];
@@ -80,9 +97,29 @@ class FolletosService {
           .timeout(const Duration(seconds: 10));
 
       final List<dynamic> data = response as List<dynamic>;
-      return data
+      final list = data
           .map((item) => OfertaSemanalModel.fromJson(item as Map<String, dynamic>))
           .toList();
+
+      // Deduplicar ofertas idénticas extraídas de diferentes páginas o lotes
+      final Map<String, OfertaSemanalModel> dedupOfertas = {};
+      for (final of in list) {
+        final m = of.marca?.toLowerCase().trim() ?? '';
+        final p = of.presentacion?.toLowerCase().trim() ?? '';
+        final key = '${of.cadena.toLowerCase()}_${m}_${of.titulo.toLowerCase().trim()}_${p}_${of.precioOferta}';
+        if (!dedupOfertas.containsKey(key)) {
+          dedupOfertas[key] = of;
+        } else {
+          final existing = dedupOfertas[key]!;
+          // Conservar la que tenga imagen de recorte o descuento informado
+          if ((existing.imagenRecorteUrl == null && of.imagenRecorteUrl != null) ||
+              (existing.descuentoPorcentaje == null && of.descuentoPorcentaje != null)) {
+            dedupOfertas[key] = of;
+          }
+        }
+      }
+
+      return dedupOfertas.values.toList();
     } catch (e, st) {
       debugPrint('[FolletosService] Error al obtener ofertas semanales: $e\n$st');
       return [];
@@ -100,9 +137,29 @@ class FolletosService {
           .timeout(const Duration(seconds: 10));
 
       final List<dynamic> data = response as List<dynamic>;
-      return data
+      final list = data
           .map((item) => OfertaSemanalModel.fromJson(item as Map<String, dynamic>))
           .toList();
+
+      // Deduplicar ofertas idénticas extraídas de diferentes páginas o lotes
+      final Map<String, OfertaSemanalModel> dedupOfertas = {};
+      for (final of in list) {
+        final m = of.marca?.toLowerCase().trim() ?? '';
+        final p = of.presentacion?.toLowerCase().trim() ?? '';
+        final key = '${of.cadena.toLowerCase()}_${m}_${of.titulo.toLowerCase().trim()}_${p}_${of.precioOferta}';
+        if (!dedupOfertas.containsKey(key)) {
+          dedupOfertas[key] = of;
+        } else {
+          final existing = dedupOfertas[key]!;
+          // Conservar la que tenga imagen de recorte o descuento informado
+          if ((existing.imagenRecorteUrl == null && of.imagenRecorteUrl != null) ||
+              (existing.descuentoPorcentaje == null && of.descuentoPorcentaje != null)) {
+            dedupOfertas[key] = of;
+          }
+        }
+      }
+
+      return dedupOfertas.values.toList();
     } catch (e) {
       debugPrint('[FolletosService] Error al obtener ofertas del folleto $folletoId: $e');
       return [];

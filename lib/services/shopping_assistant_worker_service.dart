@@ -106,14 +106,18 @@ class ShoppingAssistantWorkerService {
   Future<List<NearbyStoreBranch>> fetchNearbyStores({
     double? latitude,
     double? longitude,
+    double maxRadiusKm = 5.0,
   }) async {
     if (latitude == null || longitude == null) {
       return defaultChains;
     }
 
     try {
-      // Consultar sucursales físicas en una ventana geográfica (~12 km alrededor del usuario)
-      const delta = 0.12;
+      // Calcular ventana geográfica según el radio seleccionado por el usuario en configuración
+      final effectiveRadiusKm = maxRadiusKm > 0 ? maxRadiusKm : 5.0;
+      final maxRadiusMeters = effectiveRadiusKm * 1000.0;
+      // 1 grado de latitud equivale a ~111.32 km
+      final delta = (effectiveRadiusKm / 111.0) * 1.15;
       final minLat = (latitude - delta).toStringAsFixed(5);
       final maxLat = (latitude + delta).toStringAsFixed(5);
       final minLon = (longitude - delta).toStringAsFixed(5);
@@ -126,7 +130,7 @@ class ShoppingAssistantWorkerService {
               'id_sucursal,id_entidad,sucursales_nombre,sucursales_calle,sucursales_numero,sucursales_localidad,sucursales_latitud,sucursales_longitud,sucursales_codigo_postal,comercio(comercio_bandera_nombre,comercio_razon_social)',
           'sucursales_latitud': 'gte.$minLat',
           'and': '(sucursales_latitud.lte.$maxLat,sucursales_longitud.gte.$minLon,sucursales_longitud.lte.$maxLon)',
-          'limit': '60',
+          'limit': '80',
         },
         client: _httpClient,
       );
@@ -145,6 +149,9 @@ class ShoppingAssistantWorkerService {
           sLat,
           sLon,
         );
+
+        // Filtrar estrictamente solo comercios físicos dentro del radio definido en configuración
+        if (dist > maxRadiusMeters) continue;
 
         final comercioObj = r['comercio'] as Map<String, dynamic>?;
         final rawBandera = comercioObj?['comercio_bandera_nombre']?.toString() ??
@@ -190,18 +197,12 @@ class ShoppingAssistantWorkerService {
           (a.distanceMeters ?? double.infinity)
               .compareTo(b.distanceMeters ?? double.infinity));
 
-      // Añadir las cadenas principales que no hayan aparecido en el radio inmediato
-      final presentChains =
-          nearbyBranches.map((b) => b.chainName.toLowerCase()).toSet();
-      final merged = <NearbyStoreBranch>[...nearbyBranches.take(14)];
-
-      for (final def in defaultChains) {
-        if (!presentChains.contains(def.chainName.toLowerCase())) {
-          merged.add(def);
-        }
+      // Solo si no hay comercios físicos dentro del radio, retornar cadenas por defecto
+      if (nearbyBranches.isEmpty) {
+        return defaultChains;
       }
 
-      return merged;
+      return nearbyBranches;
     } catch (e) {
       debugPrint('[AssistantWorker] Error consultando sucursales cercanas: $e');
       return defaultChains;

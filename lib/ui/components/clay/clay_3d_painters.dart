@@ -146,7 +146,7 @@ class _Clay3DMagnifierPainter extends CustomPainter {
 // 2. LIBRETA 3D CON INDICADOR DE ÍTEMS (SUPERMERCADO)
 // ============================================================================
 
-class Clay3DNotepadIcon extends StatelessWidget {
+class Clay3DNotepadIcon extends StatefulWidget {
   final double size;
   final int itemCount;
 
@@ -157,10 +157,47 @@ class Clay3DNotepadIcon extends StatelessWidget {
   });
 
   @override
+  State<Clay3DNotepadIcon> createState() => _Clay3DNotepadIconState();
+}
+
+class _Clay3DNotepadIconState extends State<Clay3DNotepadIcon>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _animController;
+
+  @override
+  void initState() {
+    super.initState();
+    // Animación suave de flotación vertical y sutil respiración
+    _animController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 2600),
+    )..repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _animController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return CustomPaint(
-      size: Size(size, size),
-      painter: _Clay3DNotepadPainter(itemCount: itemCount),
+    return AnimatedBuilder(
+      animation: _animController,
+      builder: (context, _) {
+        final floatY = math.sin(_animController.value * math.pi) * 3.5;
+        final tilt = (math.sin(_animController.value * math.pi * 2) * 0.04);
+        return Transform.translate(
+          offset: Offset(0, -floatY),
+          child: Transform.rotate(
+            angle: tilt,
+            child: CustomPaint(
+              size: Size(widget.size, widget.size),
+              painter: _Clay3DNotepadPainter(itemCount: widget.itemCount),
+            ),
+          ),
+        );
+      },
     );
   }
 }

@@ -2,11 +2,13 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../models/shopping_assistant_model.dart';
+import '../../../services/settings_service.dart';
 import '../../../utils/format_utils.dart';
 import '../../../viewmodels/shopping_assistant_viewmodel.dart';
 import '../../../viewmodels/shopping_list_viewmodel.dart';
 import '../../components/ads/compramas_banner_ad.dart';
 import '../scan/scanner_view.dart';
+import '../home/widgets/search_price_modal_sheet.dart';
 import 'widgets/assistant_bottom_summary_bar.dart';
 import 'widgets/assistant_product_cards_carousel.dart';
 import 'widgets/product_confirmation_dialog.dart';
@@ -30,7 +32,8 @@ class _ShoppingAssistantScreenState extends State<ShoppingAssistantScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      unawaited(context.read<ShoppingAssistantViewModel>().initSession());
+      final radius = context.read<SettingsService>().searchRadiusKm;
+      unawaited(context.read<ShoppingAssistantViewModel>().initSession(maxRadiusKm: radius));
     });
   }
 
@@ -52,6 +55,12 @@ class _ShoppingAssistantScreenState extends State<ShoppingAssistantScreen> {
         builder: (_) => ScannerView(
           onBarcodeScanned: (code) {
             scannedCode = code.trim();
+          },
+          onOpenSearchModal: () {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (!mounted) return;
+              SearchPriceModalSheet.show(context);
+            });
           },
         ),
       ),
@@ -81,30 +90,8 @@ class _ShoppingAssistantScreenState extends State<ShoppingAssistantScreen> {
   }
 
   Future<void> _openManualProductDialog(ShoppingAssistantViewModel vm) async {
-    const manualLookup = AssistantProductLookupResult(
-      found: false,
-      source: 'manual',
-      ean: '',
-      name: '',
-      brand: '',
-      content: '1 un',
-      price: 0.0,
-    );
-    final confirmed = await AssistantProductConfirmationDialog.show(
-      context,
-      lookupResult: manualLookup,
-    );
-    if (!mounted || confirmed == null) return;
-
-    vm.confirmAndAddProduct(
-      ean: confirmed.ean,
-      name: confirmed.name,
-      brand: confirmed.brand,
-      content: confirmed.content,
-      unitPrice: confirmed.price,
-      quantity: confirmed.quantity,
-      source: 'manual',
-    );
+    // Permitir buscar por palabra o variedad mediante la ventana modal de catálogo
+    SearchPriceModalSheet.show(context);
   }
 
   Future<void> _openEditItemDialog(
@@ -247,7 +234,10 @@ class _ShoppingAssistantScreenState extends State<ShoppingAssistantScreen> {
                   isLoading: vm.isLoadingStores,
                   onSelectStore: vm.selectStore,
                   onOpenFullSelector: () => _openFullStoreSelector(vm),
-                  onRefreshGps: vm.refreshNearbyStores,
+                  onRefreshGps: () {
+                    final radius = context.read<SettingsService>().searchRadiusKm;
+                    vm.refreshNearbyStores(maxRadiusKm: radius);
+                  },
                 ),
                 if (vm.isLookingUpBarcode) _buildLookupProgressBanner(),
                 Expanded(
@@ -293,28 +283,14 @@ class _ShoppingAssistantScreenState extends State<ShoppingAssistantScreen> {
             tooltip: 'Volver',
           ),
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  'Asistente de Compras',
-                  style: TextStyle(
-                    fontSize: 19,
-                    fontWeight: FontWeight.w900,
-                    color: isDark ? Colors.white : const Color(0xFF0F172A),
-                    letterSpacing: -0.4,
-                  ),
-                ),
-                Text(
-                  'Escanea en góndola y controla tu gasto en vivo',
-                  style: TextStyle(
-                    fontSize: 11.5,
-                    fontWeight: FontWeight.w500,
-                    color: isDark ? Colors.white60 : const Color(0xFF64748B),
-                  ),
-                ),
-              ],
+            child: Text(
+              'Asistente de compras',
+              style: TextStyle(
+                fontSize: 19,
+                fontWeight: FontWeight.w900,
+                color: isDark ? Colors.white : const Color(0xFF0F172A),
+                letterSpacing: -0.4,
+              ),
             ),
           ),
           IconButton.filledTonal(
